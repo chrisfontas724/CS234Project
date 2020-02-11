@@ -1,5 +1,6 @@
 import numpy as np
 from optparse import OptionParser
+from models.grid import Grid
 
 
 color_dictionary = {
