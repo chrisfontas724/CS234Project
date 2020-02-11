@@ -1,4 +1,5 @@
 import numpy as np
+import cv2
 from optparse import OptionParser
 from models.grid import Grid
 
