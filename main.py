@@ -2,6 +2,7 @@ import numpy as np
 import cv2
 from optparse import OptionParser
 from models.grid import Grid
+from renderer.renderer import Renderer
 
 # Use the OptionParser library to get command line arguments
 # for us, such as the file we want to load in.
@@ -24,12 +25,8 @@ def main():
     # Instantiate the FLowFree grid.
     grid = Grid(filename="levels/" + options.level)
 
-    # Test rendering a dummy image of a circle.
-    img = np.zeros((512,512,3), np.uint8)
-    img = cv2.circle(img,(447,63), 63, (0,0,255), -1)
-    cv2.imshow('image',img)
-    cv2.waitKey(0)
-    cv2.destroyWindow('image')
+    # Initialize the renderer
+    renderer = Renderer()
 
 if __name__ == "__main__":
 	main()
