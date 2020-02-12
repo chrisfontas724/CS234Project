@@ -21,7 +21,6 @@ color_dict = {
   12:(127,0,127),
   13:(127, 127, 0),
   14:(50, 50, 127),
-
 }
 
 # This class visualizes a FlowFree grid. It is initialized with
@@ -40,12 +39,14 @@ class GridRenderer:
     # made by our algorithm(s).
     def render(self, grid):
 
+        # The dimensions in pixels each space/tile should take up.
         pixels_per_tile = int(self.size / grid.size)
 
-        # Draw the grid lines first.
-        for x in range(grid.size):
-            self.img = cv2.line(self.img, (x*pixels_per_tile,0), (x*pixels_per_tile,500), (255,255,0), 1)
-            self.img = cv2.line(self.img, (0, x*pixels_per_tile), (500, x*pixels_per_tile), (255,255,0), 1)
+        # Draw the grid lines first. Use grid.size + 1 so that a
+        # line is drawn at the edge too.
+        for i in range(grid.size+1):
+            self.img = cv2.line(self.img, (i*pixels_per_tile,0), (i*pixels_per_tile,500), (255,255,0), 1)
+            self.img = cv2.line(self.img, (0, i*pixels_per_tile), (500, i*pixels_per_tile), (255,255,0), 1)
 
         # Now draw the circles.
         for x in range(grid.size):
@@ -59,6 +60,9 @@ class GridRenderer:
                     print(color_dict[item])
                     self.img = cv2.circle(self.img,(x_offset, y_offset), radius, color_dict[item], -1)
         cv2.imshow(self.name, self.img)
+
+    # Close the window being displayed.
+    def tear_down(self):
         cv2.waitKey(0)
         cv2.destroyWindow(self.name)
 

@@ -30,6 +30,9 @@ def main():
     # Draw the grid to the screen.
     renderer.render(grid)
 
+    # Close the window.
+    renderer.tear_down()
+
 # Program entry point.
 if __name__ == "__main__":
 	main()
