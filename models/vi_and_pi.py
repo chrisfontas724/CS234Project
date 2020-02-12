@@ -1,5 +1,7 @@
 from models import Grid
 
+# Use this file to fill out policy iteration and value iteration
+# methods for solving FlowFree. This is step 1 of our project.
 
 def policy_evaluation(P, nS, nA, policy, gamma=0.9, tol=1e-3):
     pass
