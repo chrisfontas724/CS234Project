@@ -1,8 +1,7 @@
 import numpy as np
-import cv2
 from optparse import OptionParser
 from models.grid import Grid
-from renderer.renderer import Renderer
+from renderer.renderer import GridRenderer
 
 # Use the OptionParser library to get command line arguments
 # for us, such as the file we want to load in.
@@ -25,8 +24,11 @@ def main():
     # Instantiate the FLowFree grid.
     grid = Grid(filename="levels/" + options.level)
 
-    # Initialize the renderer
-    renderer = Renderer()
+    # Initialize the renderer.
+    renderer = GridRenderer()
+
+    # Draw the grid to the screen.
+    renderer.render(grid)
 
 if __name__ == "__main__":
 	main()
