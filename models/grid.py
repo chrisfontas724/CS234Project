@@ -5,12 +5,21 @@ from optparse import OptionParser
 # the colored circles and their associated paths
 # to actual RGB color values.
 color_dict = {
-  1:(255,0,0),   # Red
-  2:(0,255,0),   # Green
-  3:(0,0,255),   # Blue
-  4:(255,255,0), # Yellow
-  5:(0,255,255), # Turquoise
-  6:(255,0,255), # Purple
+  1:(255,0,0),     # Red
+  2:(0,255,0),     # Green
+  3:(0,0,255),     # Blue
+  4:(255,255,0),   # Yellow
+  5:(0,255,255),   # Turquoise
+  6:(255,0,255),   # Purple
+  7:(127,255,127),
+  8:(255,127,127),
+  9:(127,127,255),
+  10:(0,127,127),
+  11:(127,0,0),
+  12:(127,0,127),
+  13:(127, 127, 0),
+  14:(50, 50, 127),
+
 }
 
 # This class represents the board to be used in flow free. It has square dimensions N and

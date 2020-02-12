@@ -4,9 +4,10 @@ from models.grid import Grid, color_dict
 import cv2
 
 class GridRenderer:
-    def __init__(self):
+    def __init__(self, name):
         print("Init renderer")
         # This is th size of the image to display in pixels.
+        self.name = name
         self.size= 500
         self.img = np.zeros((self.size,self.size, 3), np.uint8)
 
@@ -27,6 +28,6 @@ class GridRenderer:
                     y_offset = int((y + 0.5) * pixels_per_tile) 
                     print(color_dict[item])
                     self.img = cv2.circle(self.img,(x_offset, y_offset), radius, color_dict[item], -1)
-        cv2.imshow('image', self.img)
+        cv2.imshow(self.name, self.img)
         cv2.waitKey(0)
-        cv2.destroyWindow('image')
+        cv2.destroyWindow(self.name)

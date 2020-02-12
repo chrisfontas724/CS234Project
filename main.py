@@ -25,7 +25,7 @@ def main():
     grid = Grid(filename="levels/" + options.level)
 
     # Initialize the renderer.
-    renderer = GridRenderer()
+    renderer = GridRenderer(options.level)
 
     # Draw the grid to the screen.
     renderer.render(grid)
