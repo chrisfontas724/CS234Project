@@ -1,14 +1,20 @@
 import numpy as np
 from optparse import OptionParser
 
-color_dictionary = {
-  # TODO - Fill this out
+# This dictionary maps the numbers that represent
+# the colored circles and their associated paths
+# to actual RGB color values.
+color_dict = {
+  1:(255,0,0),   # Red
+  2:(0,255,0),   # Green
+  3:(0,0,255),   # Blue
+  4:(255,255,0), # Yellow
+  5:(0,255,255), # Turquoise
+  6:(255,0,255), # Purple
 }
 
-# This class represents the board to be used
-# in flow free. It has square dimensions N and
-# contains a number of pairs of colored dots
-# located at unique locations (i,j)
+# This class represents the board to be used in flow free. It has square dimensions N and
+# contains a number of pairs of colored dots located at unique locations (i,j).
 # TODO: Fill this out more.
 class Grid:
     def __init__(self, filename):
@@ -23,12 +29,27 @@ class Grid:
             # Grab the dimensions of the grid from the
             # first line.
             if counter == 0:
-                dimensions = line.split(' ')
+                # Read the line, remove unneeded characters, convert to list then convert
+                # each item in the list to an integer.
+                dimensions = [int(numeric_string) for numeric_string in line.replace("\n", "").split(' ')] 
+
+                # We should have two entries, otherwise the file format is incorrect.
                 assert len(dimensions) == 2
+
+                # Initialize the size and the 2D numpy
+                # array that will represent the board.
                 self.size = dimensions[0]
-                print("Grid size: ", str(self.size))
-            # Else populate the grid from the data directly.
+                self.spaces = np.zeros((self.size, self.size))
+
+            # Else populate the current row we are on from the data in the line.
             else:
-                row = line.split(' ')
+                row = [int(numeric_string) for numeric_string in line.replace("\n", "").replace('\t', ' ').split(' ') if numeric_string is not ''] 
+
+                # Row length should match the size.
+                assert len(row) == self.size
+
+                # Assign row to numpy array.
+                self.spaces[counter-1] = row
+
             counter += 1
         file.close()
