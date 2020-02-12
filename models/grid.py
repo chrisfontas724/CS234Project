@@ -1,26 +1,6 @@
 import numpy as np
 from optparse import OptionParser
 
-# This dictionary maps the numbers that represent
-# the colored circles and their associated paths
-# to actual RGB color values.
-color_dict = {
-  1:(255,0,0),     # Red
-  2:(0,255,0),     # Green
-  3:(0,0,255),     # Blue
-  4:(255,255,0),   # Yellow
-  5:(0,255,255),   # Turquoise
-  6:(255,0,255),   # Purple
-  7:(127,255,127),
-  8:(255,127,127),
-  9:(127,127,255),
-  10:(0,127,127),
-  11:(127,0,0),
-  12:(127,0,127),
-  13:(127, 127, 0),
-  14:(50, 50, 127),
-
-}
 
 # This class represents the board to be used in flow free. It has square dimensions N and
 # contains a number of pairs of colored dots located at unique locations (i,j).
@@ -52,9 +32,11 @@ class Grid:
 
             # Else populate the current row we are on from the data in the line.
             else:
+                # Kind of hacky...but basically just removes the invalid characters I found and converts
+                # them to integers if they're valid numbers.
                 row = [int(numeric_string) for numeric_string in line.replace("\n", "").replace('\t', ' ').split(' ') if numeric_string is not ''] 
 
-                # Row length should match the size.
+                # Row length should match the size, otherwise the file format is wrong.
                 assert len(row) == self.size
 
                 # Assign row to numpy array.
