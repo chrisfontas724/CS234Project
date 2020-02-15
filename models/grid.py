@@ -44,3 +44,16 @@ class Grid:
 
             counter += 1
         file.close()
+
+
+    # Given an input state, return a list of possible actions that
+    # can be taken from this state. At most, the number of moves is
+    # (num_colors * num_directions).
+    def possible_actions(state):
+        pass
+
+
+    # Given a state paired with a particular action, return the next
+    # state that would be resulted in.
+    def next_state(state, action)
+        pass
