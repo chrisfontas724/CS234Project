@@ -45,6 +45,12 @@ class Grid:
             counter += 1
         file.close()
 
+    # Given an initial board configuration, generate and return a
+    # vector of all possible grid configurations. The total number
+    # for a 4x4 grid with 3 colors should be roughly around 1M.
+    def generate_all_states(initial_state):
+        pass
+
 
     # Given an input state, return a list of possible actions that
     # can be taken from this state. At most, the number of moves is
