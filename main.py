@@ -18,7 +18,7 @@ def get_options():
 
 def main():
 
-    # Grab the options.
+    # Grab the command line options.
     options, args = get_options()
 
     # Instantiate the FLowFree grid.
