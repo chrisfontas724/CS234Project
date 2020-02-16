@@ -119,6 +119,13 @@ class Grid:
         return [np.reshape(x, (-1, self.size)) for x in flat_result]
 
 
+    # Checks to see if the provided state is a winning state or not. To be
+    # a winning state, all spaces must be covered and all starting and end
+    # flows must be connected for every color.
+    def in_winning_state(self, state):
+        # TODO
+        pass
+
 
      # Fill this out to use in the test down below.
     def is_viable_action(self, state, action):
