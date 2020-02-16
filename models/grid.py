@@ -86,7 +86,6 @@ class Grid:
                     else:
                         self.color_start_coords[item] = (row, col)
                         self.color_flow_tips[item] = (row, col)
-        self.current_state = self.spaces
 
     # Given an initial board configuration, generate and return a
     # vector of all possible grid configurations. The total number
@@ -174,18 +173,18 @@ class Grid:
     # are represented numerically, however, so (red, up) would be
     # (1,0) where "1" represents the color red and "0" represents
     # the direction up.
-    def next_state(self, action_tuple):
+    def next_state(self, input_state, action_tuple):
 
         # Just do a basic check at the beginning to make sure we're not
         # passing a bad action.
-        if not self.is_viable_action(self.current_state, action_tuple):
+        if not self.is_viable_action(input_state, action_tuple):
             raise Exception('Action is not viable')
 
         # Get the color and direction from the action.
         color, action = action_tuple
 
         # Copy the state, which will be returned at the end.
-        result = self.current_state.copy()
+        result = input_state.copy()
 
         # We can  only move a color from its endpoint, so we have to find what
         # that endpoint is given the current state of the board. Then we can
@@ -200,11 +199,11 @@ class Grid:
         # then that means it has interrupted another flow, so that other flow
         # must be reset.
         def break_flow():
-            existing_value = self.current_state[new_tip[0]][new_tip[1]]
+            existing_value = input_state[new_tip[0]][new_tip[1]]
             if existing_value is not 0:
                 for row in range(self.size):
                     for col in range(self.size):
-                        item = int(self.current_state[row][col])
+                        item = int(input_state[row][col])
 
                         # Reset the space to zero if the color matches that of the broken flow and
                         # if it is neither a start point nor an end point.
@@ -221,11 +220,8 @@ class Grid:
         # We have to update the tip before exiting.
         self.color_flow_tips[color] = new_tip
 
-        # Update the current state
-        self.current_state = result
-
         # return the state.
-        return self.current_state
+        return result
 
 
 

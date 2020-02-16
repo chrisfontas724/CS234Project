@@ -26,20 +26,20 @@ class TestGridFunctions(unittest.TestCase):
         # The following bad moves should throw an exception due to
         # the assert inside |possible_actions|.
         with self.assertRaises(Exception) as context:
-            grid.next_state((1,0))
+            grid.next_state(grid.spaces, (1,0))
         self.assertTrue('Action is not viable' in str(context.exception))
 
 
         # Move red down, now there should be 5 moves available and the
         # current tip for red should be at (1,0)
-        next_state = grid.next_state((1,2))
+        next_state = grid.next_state(grid.spaces, (1,2))
         self.assertEqual(len(grid.possible_actions(next_state)), 5)
         self.assertEqual(grid.color_flow_tips[1], (1,0))
 
         # Now try to move red back up, which it shouldn't be able to
         # do because that's where it just came from.
         with self.assertRaises(Exception) as context:
-            grid.next_state((1,0))
+            grid.next_state(next_state, (1,0))
         self.assertTrue('Action is not viable' in str(context.exception))
 
 
