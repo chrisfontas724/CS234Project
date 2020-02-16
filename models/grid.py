@@ -142,6 +142,16 @@ class Grid:
                new_pos[1] < 0 or new_pos[1] >= self.size:
                 return False
 
+            # Make sure the new position doesn't intersect a fixed
+            # starting and end point.
+            for _, value in self.color_start_coords.items():
+                if new_pos == value:
+                    return False
+            for _, value in self.color_end_coords.items():
+                if new_pos == value:
+                    return False
+            
+
             # Make sure the new position doesn't already contain
             # the current flow.
             return state[new_pos[0]][new_pos[1]] != action[0]
