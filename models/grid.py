@@ -148,12 +148,15 @@ class Grid:
             return False
 
         # Make sure the new position doesn't intersect a fixed
-        # starting and end point.
+        # starting point.
         for _, value in self.color_start_coords.items():
             if new_pos == value:
                 return False
-        for _, value in self.color_end_coords.items():
-            if new_pos == value:
+
+        # Make sure the new position dosn't intersect a fixed
+        # ending point, unless its the ending point of its color.
+        for key, value in self.color_end_coords.items():
+            if key != action[0] and new_pos == value:
                 return False
 
         # Make sure the new position doesn't already contain

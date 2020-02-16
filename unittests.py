@@ -22,13 +22,11 @@ class TestGridFunctions(unittest.TestCase):
         # There should only be 4 moves available at the beginning.
         self.assertEqual(len(grid.possible_actions(grid.spaces)), 4)
 
-
         # The following bad moves should throw an exception due to
         # the assert inside |possible_actions|.
         with self.assertRaises(Exception) as context:
             grid.next_state(grid.spaces, (1,0))
         self.assertTrue('Action is not viable' in str(context.exception))
-
 
         # Move red down, now there should be 5 moves available and the
         # current tip for red should be at (1,0)
