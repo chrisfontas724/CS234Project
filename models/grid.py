@@ -86,6 +86,7 @@ class Grid:
                     else:
                         self.color_start_coords[item] = (row, col)
                         self.color_flow_tips[item] = (row, col)
+        self.current_state = self.spaces
 
     # Given an initial board configuration, generate and return a
     # vector of all possible grid configurations. The total number
