@@ -64,7 +64,9 @@ class Grid:
                 ranges.append(range(val,val+1) if val != 0 else range(0, self.num_cols+1))
 
         # itertools.product is just a compact way of doing a series of nested iterations.
-        # Each nested iteration uses the range provided at its index.
+        # Each nested iteration uses the range provided at its index. We use a flat
+        # representation of the grid here because that's what itertools.product() takes
+        # in as an argument. We unflatten it later with np.reshape().
         flat_result = list(itertools.product(*ranges, repeat=1))
 
         # The number of total possible states should be equal to (num_cols+1) ^ (num_empty_spaces).
