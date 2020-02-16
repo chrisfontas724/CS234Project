@@ -139,10 +139,10 @@ class Grid:
         # clockwise. The first coordinate is the row and the second
         # coordinate is the column.
         action_map = {
-            0:(-1,0),    # Up
-            1:(0,1),    # Right
+            0:(-1,0),  # Up
+            1:(0,1),   # Right
             2:(1,0),   # Down
-            3:(0,-1)    # Left
+            3:(0,-1)   # Left
         }
 
         # We can  only move a color from its endpoint, so we have to find what
