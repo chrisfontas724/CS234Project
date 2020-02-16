@@ -52,7 +52,7 @@ class GridRenderer:
         # Now draw the circles.
         for row in range(grid.size):
             for col in range(grid.size):
-                item = int(grid.spaces[row][col])
+                item = int(grid.current_state[row][col])
                 if item is not 0:
                     border = int(pixels_per_tile / 10)
                     radius = int((pixels_per_tile - border)/2)

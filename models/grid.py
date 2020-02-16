@@ -52,13 +52,21 @@ class Grid:
 
         file.close()
 
-        # Declare dictionaries to store the starting and ending positions for the
-        # "flows" for each color. For simplicity, and due to the fact that it doesn't
-        # affect the algorithm at all, we assume that all flows must start from one
-        # color and make its way to the other, instead of allowing the flow to start
-        # from either color arbitrarily.
+        self.reset()
+        self.possible_states = self.generate_all_states(self.spaces)
+
+
+    # Resets the grid to the starting state, before any moves have been made.
+    # Declare dictionaries to store the starting and ending positions for the
+    # "flows" for each color. For simplicity, and due to the fact that it doesn't
+    # affect the algorithm at all, we assume that all flows must start from one
+    # color and make its way to the other, instead of allowing the flow to start
+    # from either color arbitrarily. We also keep track of the current tip of the
+     # flow to keep calculating states easier.
+    def reset(self):
         self.color_start_coords = dict()
         self.color_end_coords = dict()
+        self.color_flow_tips = dict()
         for row in range(self.size):
             for col in range(self.size):
                 item = int(self.spaces[row][col])
@@ -68,6 +76,8 @@ class Grid:
                         self.color_end_coords[item] = (row, col)
                     else:
                         self.color_start_coords[item] = (row, col)
+                        self.color_flow_tips[item] = (row, col)
+        self.current_state = self.spaces
 
     # Given an initial board configuration, generate and return a
     # vector of all possible grid configurations. The total number
@@ -116,12 +126,65 @@ class Grid:
     # are represented numerically, however, so (red, up) would be
     # (1,0) where "1" represents the color red and "0" represents
     # the direction up.
-    def next_state(self, state, action):
+    def next_state(self, action_tuple):
 
-        color, direction = action
+        # Get the color and direction from the action.
+        color, action = action_tuple
 
-        result = state.copy()
+        # Copy the state, which will be returned at the end.
+        result = self.current_state.copy()
+
+        # Maps the action index to a spcific move. The action numbers
+        # 0,1,2,3 correspond to (up, right, down, left) - going around
+        # clockwise. The first coordinate is the row and the second
+        # coordinate is the column.
+        action_map = {
+            0:(-1,0),    # Up
+            1:(0,1),    # Right
+            2:(1,0),   # Down
+            3:(0,-1)    # Left
+        }
+
+        # We can  only move a color from its endpoint, so we have to find what
+        # that endpoint is given the current state of the board. Then we can
+        # append the action to it.
+        tip = self.color_flow_tips[color]
+
+        # Update the resulting state based on the move.
+        direction = action_map[action]
+        new_tip = (tip[0] + direction[0], tip[1] + direction[1])
+
+        # The move is only valid if the flow doesn't go into itself.
+        # Flows are allowed to move into empty spaces and interrupt
+        # flows of other colors.
+        existing_value = self.current_state[new_tip[0]][new_tip[1]]
+        assert existing_value is not color
+
+        # If the action moves the flow into a space that is already occupied
+        # then that means it has interrupted another flow, so that other flow
+        # must be reset.
+        if existing_value is not 0:
+            for row in range(self.size):
+                for col in range(self.size):
+                    item = int(self.spaces[row][col])
+
+                    # Reset the space to zero if the color matches that of the broken flow and
+                    # if it is neither a start point nor an end point.
+                    if item is existing_value and \
+                       item not in self.color_start_coords and \
+                       item not in self.color_end_coords:
+                        result[row][col] = 0
+
+        # Update the board.
+        result[new_tip[0]][new_tip[1]] = color 
+
+        # We have to update the tip before exiting.
+        self.color_flow_tips[color] = new_tip
+
+        # Update the current state
+        self.current_state = result
 
 
 
-        pass
+
+

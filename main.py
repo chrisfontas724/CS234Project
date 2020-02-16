@@ -27,10 +27,10 @@ def main():
     # Initialize the renderer.
     renderer = GridRenderer(options.level)
 
-   	# Generate all states.
-   # all_states = grid.generate_all_states(grid.spaces)
-
-    grid.next_state(grid.spaces, (1,1))
+    grid.next_state((1,2))
+    grid.next_state((1,1))
+    grid.next_state((1,1))
+    grid.next_state((1,1))
 
     # Draw the grid to the screen.
     renderer.render(grid)
