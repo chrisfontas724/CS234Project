@@ -27,10 +27,6 @@ def main():
     # Initialize the renderer.
     renderer = GridRenderer(options.level)
 
-    actions = grid.possible_actions(grid.spaces)
-    print("Num actions: ", len(actions))
-    print(actions)
-
     # Draw the grid to the screen.
     renderer.render(grid)
 
