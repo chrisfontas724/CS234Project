@@ -117,8 +117,7 @@ class Grid:
         assert len(flat_result) == np.power(self.num_cols + 1, (self.size * self.size) - 2*self.num_cols)
 
         # Now we have to reshape the result so it can be a (sizexsize) grid.
-        result = [np.reshape(x, (-1, self.size)) for x in flat_result]
-        return result
+        return [np.reshape(x, (-1, self.size)) for x in flat_result]
 
 
     # Given an input state, return a list of possible actions that can be
