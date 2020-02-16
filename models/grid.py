@@ -228,6 +228,9 @@ class Grid:
         # We have to update the tip before exiting.
         self.color_flow_tips[color] = new_tip
 
+        # Set the current state to be the result.
+        self.current_state = result
+
         # return the state.
         return result
 
