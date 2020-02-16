@@ -49,8 +49,6 @@ class GridRenderer:
             self.img = cv2.line(self.img, (i*pixels_per_tile,0), (i*pixels_per_tile,500), (255,255,0), 1)
             self.img = cv2.line(self.img, (0, i*pixels_per_tile), (500, i*pixels_per_tile), (255,255,0), 1)
 
-        print(grid.spaces[0])
-
         # Now draw the circles.
         for row in range(grid.size):
             for col in range(grid.size):
