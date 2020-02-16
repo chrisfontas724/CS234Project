@@ -52,32 +52,32 @@ class Grid:
     # Given an initial board configuration, generate and return a
     # vector of all possible grid configurations. The total number
     # for a 4x4 grid with 3 colors should be roughly around 1M.
-    def generate_all_states(initial_state):
-
+    def generate_all_states(self, initial_state):
         ranges = list()
         for x in range(self.size):
             for y in range(self.size):
-                val = initial_state[x][y]
-                if val != 0:
-                    ranges.append(Range(val, val+1))
-                else:
-                    ranges.append(Range(0,self.num_cols + 1))
+                val = int(initial_state[x][y])
+                ranges.append(range(val,val+1) if val != 0 else range(0, self.num_cols+1))
 
-        flat_result = list(product(ranges, repeat=1))
+        flat_result = list(itertools.product(*ranges, repeat=1))
 
-        result = [np.reshape(x, (-1, 2)) for x in flat_result]
+        # The number of total possible states should be equal to (num_cols+1) ^ (num_empty_spaces).
+        # The base is num_cols + 1 to account for empty spaces. So if your colors are [1,2,3], the
+        # possible values for a non-empty space are [0,1,2,3].
+        assert len(flat_result) == np.power(self.num_cols + 1, (self.size * self.size) - 2*self.num_cols)
 
-        return result
+
+        return flat_result
 
 
     # Given an input state, return a list of possible actions that
     # can be taken from this state. At most, the number of moves is
     # (num_colors * num_directions).
-    def possible_actions(state):
+    def possible_actions(self, state):
         pass
 
 
     # Given a state paired with a particular action, return the next
     # state that would be resulted in.
-    def next_state(state, action):
+    def next_state(self, state, action):
         pass
