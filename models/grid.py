@@ -59,7 +59,6 @@ class Grid:
 
             self.num_cols = 3 # HACK
 
-
         file.close()
 
         self.reset()
@@ -134,7 +133,18 @@ class Grid:
         # Fill this out to use in the test down below.
         def is_viable_action(state, action):
             # TODO: Fill this out
-            return False
+            tip = self.color_flow_tips[action[0]]
+            direction = action_map[action[1]]
+            new_pos = (tip[0] + direction[0], tip[1] + direction[1])
+
+            # Make sure the new position is in bounds.
+            if new_pos[0] < 0 or new_pos[0] >= self.size or \
+               new_pos[1] < 0 or new_pos[1] >= self.size:
+                return False
+
+            # Make sure the new position doesn't already contain
+            # the current flow.
+            return state[new_pos[0]][new_pos[1]] != action[0]
 
         # Loop over all possible colors:
         for col in range(1, self.num_cols + 1):
