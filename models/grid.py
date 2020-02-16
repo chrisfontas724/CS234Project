@@ -65,6 +65,13 @@ class Grid:
         self.possible_states = self.generate_all_states(self.spaces)
 
 
+    # TODO: Make a state subclass and make the flow tips a part of the
+    # state rather than a global aspect of the whole grid itself.
+    class State:
+        def __init__(self):
+            self.color_flow_tips = dict()
+
+
     # Resets the grid to the starting state, before any moves have been made.
     # Declare dictionaries to store the starting and ending positions for the
     # "flows" for each color. For simplicity, and due to the fact that it doesn't
