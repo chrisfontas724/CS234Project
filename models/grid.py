@@ -2,6 +2,16 @@ import numpy as np
 from optparse import OptionParser
 import itertools
 
+# Maps the action index to a spcific move. The action numbers
+# 0,1,2,3 correspond to (up, right, down, left) - going around
+# clockwise. The first coordinate is the row and the second
+# coordinate is the column.
+action_map = {
+    0:(-1,0),  # Up
+    1:(0,1),   # Right
+    2:(1,0),   # Down
+    3:(0,-1)   # Left
+}
 
 # This class represents the board to be used in flow free. It has square dimensions N and
 # contains a number of pairs of colored dots located at unique locations (i,j).
@@ -113,10 +123,16 @@ class Grid:
 
 
     # Given an input state, return a list of possible actions that
-    # can be taken from this state. At most, the number of moves is
+    # can be taken from the current. At most, the number of moves is
     # (num_colors * num_directions).
-    def possible_actions(self, state):
-        pass
+    def possible_actions(self):
+        
+        # The list of all action tuples you can take from the
+        # current board configuration.
+        result = list()
+
+
+        return result
 
 
     # Given a state paired with a particular action, return the next
@@ -133,17 +149,6 @@ class Grid:
 
         # Copy the state, which will be returned at the end.
         result = self.current_state.copy()
-
-        # Maps the action index to a spcific move. The action numbers
-        # 0,1,2,3 correspond to (up, right, down, left) - going around
-        # clockwise. The first coordinate is the row and the second
-        # coordinate is the column.
-        action_map = {
-            0:(-1,0),  # Up
-            1:(0,1),   # Right
-            2:(1,0),   # Down
-            3:(0,-1)   # Left
-        }
 
         # We can  only move a color from its endpoint, so we have to find what
         # that endpoint is given the current state of the board. Then we can
