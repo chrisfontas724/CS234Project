@@ -122,15 +122,28 @@ class Grid:
         return result
 
 
-    # Given an input state, return a list of possible actions that
-    # can be taken from the current. At most, the number of moves is
+    # Given an input state, return a list of possible actions that can be
+    # taken from the provided state. At most, the number of moves is
     # (num_colors * num_directions).
-    def possible_actions(self):
+    def possible_actions(self, state):
         
         # The list of all action tuples you can take from the
         # current board configuration.
         result = list()
 
+        # Fill this out to use in the test down below.
+        def is_viable_action(state, action):
+            # TODO: Fill this out
+            return False
+
+        # Loop over all possible colors:
+        for col in range(1, self.num_cols + 1):
+            # Loop over actions in the action map.
+            for key, value in action_map.items():
+                test_action = (col, key)
+
+                if is_viable_action(state, test_action):
+                    result.append(test_action)
 
         return result
 
@@ -191,6 +204,9 @@ class Grid:
 
         # Update the current state
         self.current_state = result
+
+        # return the state.
+        return self.current_state
 
 
 
