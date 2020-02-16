@@ -12,7 +12,7 @@ def get_options():
     parser.add_option("-l", "--level",
                       action="store", # optional because action defaults to "store"
                       dest="level",
-                      default="easy-1.txt",
+                      default="test_level.txt",
                       help="FlowFree level to load",)
     return parser.parse_args()
 

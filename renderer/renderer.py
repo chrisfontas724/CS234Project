@@ -34,6 +34,7 @@ class GridRenderer:
         self.size= 500
         self.img = np.zeros((self.size,self.size, 3), np.uint8)
 
+
     # This function takes in a grid and renders it to the screen
     # so that we can visually keep track of the progress being
     # made by our algorithm(s).
@@ -49,16 +50,23 @@ class GridRenderer:
             self.img = cv2.line(self.img, (0, i*pixels_per_tile), (500, i*pixels_per_tile), (255,255,0), 1)
 
         # Now draw the circles.
-        for x in range(grid.size):
-            for y in range(grid.size):
+        for y in range(grid.size):
+            for x in range(grid.size):
                 item = int(grid.spaces[x][y])
                 if item is not 0:
                     border = int(pixels_per_tile / 10)
                     radius = int((pixels_per_tile - border)/2)
                     x_offset = int((x + 0.5) * pixels_per_tile)
                     y_offset = int((y + 0.5) * pixels_per_tile) 
+                    print("ITEM: ", item)
                     print(color_dict[item])
                     self.img = cv2.circle(self.img,(x_offset, y_offset), radius, color_dict[item], -1)
+                break
+            break
+
+        # OpenCV is BGR but we have values in RGB, so convert them here before
+        # writing them out.
+        self.img = cv2.cvtColor(self.img, cv2.COLOR_BGR2RGB)
         cv2.imshow(self.name, self.img)
 
     # Close the window being displayed.

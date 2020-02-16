@@ -1,5 +1,6 @@
 import numpy as np
 from optparse import OptionParser
+import itertools
 
 
 # This class represents the board to be used in flow free. It has square dimensions N and
@@ -37,19 +38,36 @@ class Grid:
                 row = [int(numeric_string) for numeric_string in line.replace("\n", "").replace('\t', ' ').split(' ') if numeric_string is not ''] 
 
                 # Row length should match the size, otherwise the file format is wrong.
-                assert len(row) == self.size
+                assert len(row) == self.size, \
+                    "length is %r but should be %r" % (len(row), self.size)
 
                 # Assign row to numpy array.
                 self.spaces[counter-1] = row
 
             counter += 1
+
+            self.num_cols = 3 # HACK
         file.close()
 
     # Given an initial board configuration, generate and return a
     # vector of all possible grid configurations. The total number
     # for a 4x4 grid with 3 colors should be roughly around 1M.
     def generate_all_states(initial_state):
-        pass
+
+        ranges = list()
+        for x in range(self.size):
+            for y in range(self.size):
+                val = initial_state[x][y]
+                if val != 0:
+                    ranges.append(Range(val, val+1))
+                else:
+                    ranges.append(Range(0,self.num_cols + 1))
+
+        flat_result = list(product(ranges, repeat=1))
+
+        result = [np.reshape(x, (-1, 2)) for x in flat_result]
+
+        return result
 
 
     # Given an input state, return a list of possible actions that
@@ -61,5 +79,5 @@ class Grid:
 
     # Given a state paired with a particular action, return the next
     # state that would be resulted in.
-    def next_state(state, action)
+    def next_state(state, action):
         pass
