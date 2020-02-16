@@ -28,7 +28,9 @@ def main():
     renderer = GridRenderer(options.level)
 
    	# Generate all states.
-    all_states = grid.generate_all_states(grid.spaces)
+   # all_states = grid.generate_all_states(grid.spaces)
+
+    grid.next_state(grid.spaces, (1,1))
 
     # Draw the grid to the screen.
     renderer.render(grid)

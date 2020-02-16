@@ -9,6 +9,7 @@ import itertools
 class Grid:
     def __init__(self, filename):
         print("Initializing grid....")
+
         file = open(filename, "r") 
         counter = 0
         while True:
@@ -47,11 +48,33 @@ class Grid:
             counter += 1
 
             self.num_cols = 3 # HACK
+
+
         file.close()
+
+        # Declare dictionaries to store the starting and ending positions for the
+        # "flows" for each color. For simplicity, and due to the fact that it doesn't
+        # affect the algorithm at all, we assume that all flows must start from one
+        # color and make its way to the other, instead of allowing the flow to start
+        # from either color arbitrarily.
+        self.color_start_coords = dict()
+        self.color_end_coords = dict()
+        for row in range(self.size):
+            for col in range(self.size):
+                item = int(self.spaces[row][col])
+                if item != 0:
+                    if item in self.color_start_coords:
+                        assert item not in self.color_end_coords
+                        self.color_end_coords[item] = (row, col)
+                    else:
+                        self.color_start_coords[item] = (row, col)
 
     # Given an initial board configuration, generate and return a
     # vector of all possible grid configurations. The total number
     # for a 4x4 grid with 3 colors should be roughly around 1M.
+    # It should be possible to tighten the number of possible states
+    # by disallowing certain impossible configurations, but for now
+    # we are defining states more loosely for simplicity.
     def generate_all_states(self, initial_state):
         ranges = list()
         for x in range(self.size):
@@ -87,6 +110,18 @@ class Grid:
 
 
     # Given a state paired with a particular action, return the next
-    # state that would be resulted in.
+    # state that would be resulted in. Actions are defined as tuples
+    # consisting of a color to move, and the direction in which to
+    # move it. For example (red, up) and (blue, left). These values
+    # are represented numerically, however, so (red, up) would be
+    # (1,0) where "1" represents the color red and "0" represents
+    # the direction up.
     def next_state(self, state, action):
+
+        color, direction = action
+
+        result = state.copy()
+
+
+
         pass
