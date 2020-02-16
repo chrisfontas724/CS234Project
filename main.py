@@ -27,11 +27,6 @@ def main():
     # Initialize the renderer.
     renderer = GridRenderer(options.level)
 
-    grid.next_state((1,2))
-    grid.next_state((1,1))
-    grid.next_state((1,1))
-    grid.next_state((1,1))
-
     # Draw the grid to the screen.
     renderer.render(grid)
 
