@@ -120,6 +120,32 @@ class Grid:
         return [np.reshape(x, (-1, self.size)) for x in flat_result]
 
 
+
+     # Fill this out to use in the test down below.
+    def is_viable_action(self, state, action):
+        # TODO: Fill this out
+        tip = self.color_flow_tips[action[0]]
+        direction = action_map[action[1]]
+        new_pos = (tip[0] + direction[0], tip[1] + direction[1])
+
+        # Make sure the new position is in bounds.
+        if new_pos[0] < 0 or new_pos[0] >= self.size or \
+            new_pos[1] < 0 or new_pos[1] >= self.size:
+            return False
+
+        # Make sure the new position doesn't intersect a fixed
+        # starting and end point.
+        for _, value in self.color_start_coords.items():
+            if new_pos == value:
+                return False
+        for _, value in self.color_end_coords.items():
+            if new_pos == value:
+                return False
+
+        # Make sure the new position doesn't already contain
+        # the current flow.
+        return state[new_pos[0]][new_pos[1]] != action[0]
+
     # Given an input state, return a list of possible actions that can be
     # taken from the provided state. At most, the number of moves is
     # (num_colors * num_directions).
@@ -129,39 +155,13 @@ class Grid:
         # current board configuration.
         result = list()
 
-        # Fill this out to use in the test down below.
-        def is_viable_action(state, action):
-            # TODO: Fill this out
-            tip = self.color_flow_tips[action[0]]
-            direction = action_map[action[1]]
-            new_pos = (tip[0] + direction[0], tip[1] + direction[1])
-
-            # Make sure the new position is in bounds.
-            if new_pos[0] < 0 or new_pos[0] >= self.size or \
-               new_pos[1] < 0 or new_pos[1] >= self.size:
-                return False
-
-            # Make sure the new position doesn't intersect a fixed
-            # starting and end point.
-            for _, value in self.color_start_coords.items():
-                if new_pos == value:
-                    return False
-            for _, value in self.color_end_coords.items():
-                if new_pos == value:
-                    return False
-            
-
-            # Make sure the new position doesn't already contain
-            # the current flow.
-            return state[new_pos[0]][new_pos[1]] != action[0]
-
         # Loop over all possible colors:
         for col in range(1, self.num_cols + 1):
             # Loop over actions in the action map.
             for key, value in action_map.items():
                 test_action = (col, key)
 
-                if is_viable_action(state, test_action):
+                if self.is_viable_action(state, test_action):
                     result.append(test_action)
 
         return result
@@ -175,6 +175,11 @@ class Grid:
     # (1,0) where "1" represents the color red and "0" represents
     # the direction up.
     def next_state(self, action_tuple):
+
+        # Just do a basic check at the beginning to make sure we're not
+        # passing a bad action.
+        if not self.is_viable_action(self.current_state, action_tuple):
+            raise Exception('Action is not viable')
 
         # Get the color and direction from the action.
         color, action = action_tuple
@@ -191,16 +196,12 @@ class Grid:
         direction = action_map[action]
         new_tip = (tip[0] + direction[0], tip[1] + direction[1])
 
-        # The move is only valid if the flow doesn't go into itself.
-        # Flows are allowed to move into empty spaces and interrupt
-        # flows of other colors.
-        existing_value = self.current_state[new_tip[0]][new_tip[1]]
-        assert existing_value is not color
 
         # If the action moves the flow into a space that is already occupied
         # then that means it has interrupted another flow, so that other flow
         # must be reset.
         def break_flow():
+            existing_value = self.current_state[new_tip[0]][new_tip[1]]
             if existing_value is not 0:
                 for row in range(self.size):
                     for col in range(self.size):
