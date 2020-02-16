@@ -56,9 +56,15 @@ class Grid:
         ranges = list()
         for x in range(self.size):
             for y in range(self.size):
+                # If the initial state already has a value at a coordinate (x,y) then
+                # that is a fixed point that should not be altered. This is represented
+                # by setting its range to (val, val+1) so that its always set to |val|.
+                # Otherwise, the range should be [0, num_cols + 1).
                 val = int(initial_state[x][y])
                 ranges.append(range(val,val+1) if val != 0 else range(0, self.num_cols+1))
 
+        # itertools.product is just a compact way of doing a series of nested iterations.
+        # Each nested iteration uses the range provided at its index.
         flat_result = list(itertools.product(*ranges, repeat=1))
 
         # The number of total possible states should be equal to (num_cols+1) ^ (num_empty_spaces).
@@ -66,8 +72,9 @@ class Grid:
         # possible values for a non-empty space are [0,1,2,3].
         assert len(flat_result) == np.power(self.num_cols + 1, (self.size * self.size) - 2*self.num_cols)
 
-
-        return flat_result
+        # Now we have to reshape the result so it can be a (sizexsize) grid.
+        result = [np.reshape(x, (-1, self.size)) for x in flat_result]
+        return result
 
 
     # Given an input state, return a list of possible actions that

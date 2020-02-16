@@ -28,8 +28,8 @@ def main():
     renderer = GridRenderer(options.level)
 
     result = grid.generate_all_states(grid.spaces)
-    # print("RESULT: ", len(result))
-    # print(result)
+    print("RESULT: ", len(result))
+    print(result[0])
     return
 
     # Draw the grid to the screen.
