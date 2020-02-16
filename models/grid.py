@@ -196,7 +196,6 @@ class Grid:
         direction = action_map[action]
         new_tip = (tip[0] + direction[0], tip[1] + direction[1])
 
-
         # If the action moves the flow into a space that is already occupied
         # then that means it has interrupted another flow, so that other flow
         # must be reset.
@@ -205,13 +204,13 @@ class Grid:
             if existing_value is not 0:
                 for row in range(self.size):
                     for col in range(self.size):
-                        item = int(self.spaces[row][col])
+                        item = int(self.current_state[row][col])
 
                         # Reset the space to zero if the color matches that of the broken flow and
                         # if it is neither a start point nor an end point.
                         if item is existing_value and \
-                            item not in self.color_start_coords and \
-                            item not in self.color_end_coords:
+                            self.color_start_coords[item] != (row, col) and \
+                            self.color_end_coords[item] != (row, col):
                             result[row][col] = 0
         # Call break flow.
         break_flow()
