@@ -1,6 +1,7 @@
 import numpy as np
 from optparse import OptionParser
 import itertools
+import copy 
 
 # Maps the action index to a spcific move. The action numbers
 # 0,1,2,3 correspond to (up, right, down, left) - going around
@@ -158,7 +159,7 @@ class Grid:
             color, action = action_tuple
 
             # Copy the state, which will be returned at the end.
-            result = self.copy()
+            result = copy.deepcopy(self)
 
             # We can  only move a color from its endpoint, so we have to find what
             # that endpoint is given the current state of the board. Then we can
@@ -173,18 +174,19 @@ class Grid:
             # then that means it has interrupted another flow, so that other flow
             # must be reset.
             def break_flow():
-                existing_value = input_state[new_tip[0]][new_tip[1]]
-                if existing_value is not 0:
+                existing_value = self.spaces[new_tip[0]][new_tip[1]]
+                if existing_value != 0:
                     for row in range(self.info.size):
                         for col in range(self.info.size):
-                            item = int(input_state[row][col])
+                            item = int(self.spaces[row][col])
 
                             # Reset the space to zero if the color matches that of the broken flow and
                             # if it is neither a start point nor an end point.
-                            if item is existing_value and \
+                            if item == existing_value and \
                                 self.info.color_start_coords[item] != (row, col) and \
                                 self.info.color_end_coords[item] != (row, col):
-                                result[row][col] = 0
+                                result.spaces[row][col] = 0
+                                result.tips[existing_value] = result.info.color_start_coords[existing_value]
             # Call break flow.
             break_flow()
 
@@ -284,8 +286,10 @@ class Grid:
 
             for color in range(1, self.num_cols + 1):
                 for action in action_map:
-                    next_state = self.next_state(initial_state, (color, action))
-
+                    try:
+                        next_state = current_state.next_state((color, action))
+                    except:
+                        pass
             return result
         return generate_recursive(self.start_state)
 

@@ -8,6 +8,7 @@ class TestGridFunctions(unittest.TestCase):
     # Test to make sure that the static Grid function |is_valid_state| works
     # as intended.
     def test_valid_states(self):
+        return
         spaces = np.array([[ 1,  2,  3,  0],
                            [ 0,  0,  0,  0],
                            [ 0,  0,  0,  0],
@@ -95,202 +96,66 @@ class TestGridFunctions(unittest.TestCase):
         self.assertTrue(state.is_valid())
 
 
-    # # Test to make sure we are calculating flow tips correctly.
-    # def test_flow_tips(self):
-    #     return
-    #     grid = np.array([[ 1,  2,  3,  0],
-    #                      [ 0,  0,  0,  0],
-    #                      [ 0,  0,  0,  0],
-    #                      [ 1,  2,  3,  0]])
+    # Test to make sure that we can transition states correctly.
+    def test_next_state_function(self):
+        spaces = np.array([[ 1,  2,  3,  0],
+                           [ 0,  0,  0,  0],
+                           [ 0,  0,  0,  0],
+                           [ 1,  2,  3,  0]])
+        start_coords = {
+            1:(0,0),
+            2:(0,1),
+            3:(0,2)
+        }
+        end_coords = {
+            1:(3,0),
+            2:(3,1),
+            3:(3,2)
+        }
+        grid = Grid.create(spaces, 3, start_coords, end_coords)
 
-    #     start_coords = {
-    #         1:(0,0),
-    #         2:(0,1),
-    #         3:(0,2)
-    #     }
-    #     end_coords = {
-    #         1:(3,0),
-    #         2:(3,1),
-    #         3:(3,2)
-    #     }
+        state = grid.start_state
+        state = state.next_state((1,2))
 
-    #     # The flow tips for the first 3 colors should be the starting coordinates.
-    #     self.assertEqual(Grid.get_flow_tip(grid, 4, 1, start_coords, end_coords), start_coords[1])
-    #     self.assertEqual(Grid.get_flow_tip(grid, 4, 2, start_coords, end_coords), start_coords[2])
-    #     self.assertEqual(Grid.get_flow_tip(grid, 4, 3, start_coords, end_coords), start_coords[3])
-
-    #     # Move the red (1) flow down and over.
-    #     grid[1,0] = 1
-    #     grid[1,1] = 1
-    #     self.assertEqual(Grid.get_flow_tip(grid, 4, 1, start_coords, end_coords), (1,1))
-
-    #     # Move the 2 flows all the way down to the end.
-    #     grid[1][1] = 2
-    #     grid[2][1] = 2
-    #     self.assertEqual(Grid.get_flow_tip(grid, 4, 2, start_coords, end_coords), end_coords[2])
-
-    #     # Make a grid with the 3 flows.
-    #     grid[0][3] = 3
-    #     grid[1][2] = 3
-    #     grid[1][3] = 3
-    #     self.assertEqual(Grid.get_flow_tip(grid, 4, 3, start_coords, end_coords), (1,2))
-
-    #     # Make the other 2 a 3.
-    #     grid[1,1] = 3
-    #     print(grid)
-    #     self.assertEqual(Grid.get_flow_tip(grid, 4, 3, start_coords, end_coords), (1,1))
+        next_spaces = np.array([[1,2,3,0],
+                                [1,0,0,0],
+                                [0,0,0,0],
+                                [1,2,3,0]])
+        self.assertTrue(np.array_equal(state.spaces, next_spaces))
+        self.assertEqual(state.tips[1], (1,0))
 
 
-    #     state = np.array([[ 1,  2,  3,  3],
-    #                       [ 1,  2,  3,  3],
-    #                       [ 1,  2,  3,  3],
-    #                       [ 1,  2,  3,  3]])
-    #     self.assertEqual(Grid.get_flow_tip(state, 4, 1, start_coords, end_coords), end_coords[1])
-    #     self.assertEqual(Grid.get_flow_tip(state, 4, 2, start_coords, end_coords), end_coords[2])
-    #     self.assertEqual(Grid.get_flow_tip(state, 4, 3, start_coords, end_coords), end_coords[3])
+        state = state.next_state((1,1))
+        next_spaces = np.array([[1,2,3,0],
+                                [1,1,0,0],
+                                [0,0,0,0],
+                                [1,2,3,0]])
+        self.assertTrue(np.array_equal(state.spaces, next_spaces))
+        self.assertEqual(state.tips[1], (1,1))
+
+        # Have 2 move down, obliterating 1s flow.
+        state = state.next_state((2,2))
+        next_spaces = np.array([[1,2,3,0],
+                                [0,2,0,0],
+                                [0,0,0,0],
+                                [1,2,3,0]])
+
+        print("TEST")
+        print(state.spaces)
+        self.assertTrue(np.array_equal(state.spaces, next_spaces))
+        self.assertEqual(state.tips[1], (0,0)) 
+        self.assertEqual(state.tips[2], (1,1)) 
 
 
-    # # Do some more advanced flow tip testing on a 5x5 grid with a single color.
-    # def test_flow_tips_part_2(self):
-    #     return
-    #     state = np.array([[ 1,  0,  0,  0, 0],
-    #                       [ 0,  0,  0,  0, 0],
-    #                       [ 0,  0,  1,  0, 0],
-    #                       [ 0,  0,  0,  0, 0],
-    #                       [ 0,  0,  0,  0, 0]])
 
-    #     start_coords = {
-    #         1:(2,2),
-    #     }
-    #     end_coords = {
-    #         1:(0,0),
-    #     }
-
-    #     self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), start_coords[1])
-
-
-    #     state = np.array([[ 1,  0,  0,  0, 0],
-    #                       [ 0,  0,  0,  0, 0],
-    #                       [ 0,  1,  1,  0, 0],
-    #                       [ 0,  1,  1,  0, 0],
-    #                       [ 0,  0,  0,  0, 0]])
-    #     self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (2,1))
-
-
-    #     state = np.array([[ 1,  0,  0,  0, 0],
-    #                       [ 0,  0,  0,  0, 0],
-    #                       [ 0,  1,  1,  0, 0],
-    #                       [ 0,  1,  1,  1, 0],
-    #                       [ 0,  0,  0,  0, 0]])
-    #     self.assertTrue(Grid.is_valid_state(state, 5, start_coords, end_coords))
-    #     self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (3,3))
-
-    #     state = np.array([[ 1,  0,  0,  0, 0],
-    #                       [ 0,  1,  0,  0, 0],
-    #                       [ 0,  1,  1,  0, 0],
-    #                       [ 0,  1,  1,  0, 0],
-    #                       [ 0,  0,  0,  0, 0]])
-    #     self.assertTrue(Grid.is_valid_state(state, 5, start_coords, end_coords))
-    #     self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (1,1))
-
-    #     state = np.array([[ 1,  0,  0,  0, 0],
-    #                       [ 0,  0,  0,  0, 0],
-    #                       [ 0,  0,  1,  1, 0],
-    #                       [ 0,  1,  1,  1, 0],
-    #                       [ 0,  1,  0,  0, 0]])
-    #     self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (4,1))
-
-    #     # Really windy snake example.
-    #     state = np.array([[ 1,  0,  0,  0, 1],
-    #                       [ 0,  0,  0,  0, 1],
-    #                       [ 0,  0,  1,  1, 1],
-    #                       [ 0,  1,  1,  1, 1],
-    #                       [ 0,  1,  1,  1, 1]])
-    #     self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (0,4))
-
-    #     # What if we wind another way?
-    #     state = np.array([[ 1,  0,  0,  0, 0],
-    #                       [ 0,  0,  1,  1, 0],
-    #                       [ 1,  1,  1,  1, 0],
-    #                       [ 0,  1,  1,  1, 0],
-    #                       [ 0,  0,  0,  0, 0]])
-    #     self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (2,0))
-
-
-    #     state = np.array([[ 1,  0,  0,  0, 0],
-    #                       [ 1,  0,  0,  0, 0],
-    #                       [ 1,  1,  1,  0, 0],
-    #                       [ 0,  0,  0,  0, 0],
-    #                       [ 0,  0,  0,  0, 0]])
-    #     self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (0,0))
-
-
-    #     # state = np.array([[ 1,  0,  0,  0, 0],
-    #     #                   [ 1,  1,  0,  0, 0],
-    #     #                   [ 1,  1,  1,  0, 0],
-    #     #                   [ 0,  0,  0,  0, 0],
-    #     #                   [ 0,  0,  0,  0, 0]])
-    #     # self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (1,1))
-
-    #     # This is a trick...should NOT be valid.
-    #     state = np.array([[ 1,  0,  0,  0, 0],
-    #                       [ 0,  0,  0,  0, 0],
-    #                       [ 0,  1,  1,  0, 0],
-    #                       [ 0,  1,  1,  0, 0],
-    #                       [ 0,  1,  0,  0, 0]])
-    #     self.assertFalse(Grid.is_valid_state(state, 5, start_coords, end_coords))
-
-    # # Test to see if we can determine a winning board or not.
-    # def test_winning_board(self):
-    #     return
-    #     state = np.array([[ 1,  2,  3,  0],
-    #                      [ 0,  0,  0,  0],
-    #                      [ 0,  0,  0,  0],
-    #                      [ 1,  2,  3,  0]])
-
-    #     start_coords = {
-    #         1:(0,0),
-    #         2:(0,1),
-    #         3:(0,2)
-    #     }
-    #     end_coords = {
-    #         1:(3,0),
-    #         2:(3,1),
-    #         3:(3,2)
-    #     }
-
-    #     # Starting state is NOT the winning state.
-    #     self.assertFalse(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
-
-    #     # Flows are all connected but there are still 0s.
-    #     state = np.array([[ 1,  2,  3,  0],
-    #                       [ 1,  2,  3,  0],
-    #                       [ 1,  2,  3,  0],
-    #                       [ 1,  2,  3,  0]])
-    #     self.assertFalse(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
-
-    #     # Now we win!
-    #     state = np.array([[ 1,  2,  3,  3],
-    #                       [ 1,  2,  3,  3],
-    #                       [ 1,  2,  3,  3],
-    #                       [ 1,  2,  3,  3]])
-    #     self.assertTrue(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
-
-    #     # This other configuration should also win.
-    #     state = np.array([[ 1,  2,  3,  3],
-    #                       [ 1,  2,  2,  3],
-    #                       [ 1,  2,  2,  3],
-    #                       [ 1,  2,  3,  3]])
-    #     self.assertTrue(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
-
-    # def test_basic_grid(self):
-    #     # Create grid.
-    #     grid = Grid(filename="levels/test_level.txt")
+    def test_basic_grid(self):
+        # Create grid.
+        grid = Grid(filename="levels/test_level.txt")
 
     #     # Originally this is 5241
     #     print("Number of valid states: ", len(grid.possible_states))
 
-    #     print("Number of valid states part 2: ", grid.generate_all_states_test(grid.spaces, grid.color_start_coords))
+        print("Number of valid states part 2: ", len(grid.generate_all_states_test()))
 
     #     return
 
