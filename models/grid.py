@@ -2,6 +2,7 @@ import numpy as np
 from optparse import OptionParser
 import itertools
 import copy 
+import sys
 
 # Maps the action index to a spcific move. The action numbers
 # 0,1,2,3 correspond to (up, right, down, left) - going around
@@ -228,6 +229,9 @@ class Grid:
                         if (x,y) != start and (x,y) != end:
                             connection = find_connection(space, x,y, visited)
                             if connection == (-1,-1) or connection in start_visited or connection in end_visited:
+                                print("Visited: ", visited)
+                                print("NOOOO: ", connection)
+                                print("SPACE: ", (x,y))
                                 return False
                             else:
                                 visited.add(((x,y), connection))
@@ -253,7 +257,7 @@ class Grid:
 
             # Finally, make sure all the flows have reached their end goal.
             for color in range(1, num_cols + 1):
-                if Grid.get_flow_tip(state, size, color, start_coords, end_coords) != end_coords[color]:
+                if  self.tips[color] != self.info.color_end_coords[color]:
                     return False
         
             # We win!
@@ -279,19 +283,46 @@ class Grid:
 
     def generate_all_states_test(self):
 
+        result = []
+        stack = [self.start_state]
+        seen = set()
 
-        def generate_recursive(current_state):
-            result = []
-            result.append(current_state)
-
+        while len(stack) > 0:
+            curr = stack.pop()
+            result.append(curr)
+            #print("Result size: ", len(result))
+            seen.add(curr)
             for color in range(1, self.num_cols + 1):
                 for action in action_map:
                     try:
-                        next_state = current_state.next_state((color, action))
+                        next_state = curr.next_state((color, action))
+                        if not next_state.is_valid():
+                            print("AAAHHHHHHHH")
+                            print(next_state.spaces)
+                            exit(1)
+                       # print("Whooooo")
+                        #print(next_state.spaces)
+                        #print("\n")
+                        if next_state.is_valid() and next_state not in seen:
+                            stack.append(next_state)
                     except:
                         pass
-            return result
-        return generate_recursive(self.start_state)
+        return result
+
+        # sys.setrecursionlimit(100000)
+
+        # def generate_recursive(current_state):
+        #     result = []
+        #     for color in range(1, self.num_cols + 1):
+        #         for action in action_map:
+        #             try:
+        #                 next_state = current_state.next_state((color, action))
+        #                 result.append(next_state)
+        #                 result = result + generate_recursive(next_state)
+        #             except:
+        #                 pass
+        #     return result
+        # return [self.start_state] + generate_recursive(self.start_state)
 
 
 
@@ -349,38 +380,6 @@ class Grid:
                     else:
                         self.color_start_coords[item] = (row, col)
         self.start_state = Grid.State(self, self.spaces, self.color_start_coords)
-
-
-    # Find the tip of the flow for a particular color
-    # for a particular state. The flow tip is where
-    # any subsequent actions need to be taken from.
-    @staticmethod
-    def get_flow_tip(state, size, color, start_coords, end_coords):
-        visited = set()
-        flow_tip = start_coords[color]
-        visited.add(flow_tip)
-        while True:
-            should_quit = True
-            for action in range(4):
-                direction = action_map[action]
-                next_spot = (flow_tip[0] + direction[0], flow_tip[1] + direction[1])
-               # print("NEXT SPOT: ", next_spot)
-
-                if next_spot == end_coords[color]:
-                    flow_tip = next_spot
-                    break
-
-                if next_spot[0] >= 0 and next_spot[0] < size and next_spot[1] >=0 and next_spot[1] < size:
-                    if state[next_spot[0]][next_spot[1]] == color and next_spot not in visited:
-                        flow_tip = next_spot
-                        #print("TIP: ", flow_tip)
-                        visited.add(flow_tip)
-                        should_quit = False
-                        break
-            if should_quit:
-                break
-                        
-        return flow_tip
 
 
 
