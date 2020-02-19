@@ -148,6 +148,7 @@ class TestGridFunctions(unittest.TestCase):
 
 
     def test_multiple_transitions(self):
+        return
         spaces = np.array([[ 1,  2,  3,  0],
                            [ 0,  0,  0,  0],
                            [ 0,  0,  0,  0],
@@ -185,14 +186,62 @@ class TestGridFunctions(unittest.TestCase):
         self.assertTrue(state.is_valid())
  
 
+    def test_about_to_win_state(self):
+        spaces = np.array([[ 1,  2,  3,  0],
+                           [ 0,  0,  0,  0],
+                           [ 0,  0,  0,  0],
+                           [ 1,  2,  3,  0]])
+        start_coords = {
+            1:(0,0),
+            2:(0,1),
+            3:(0,2)
+        }
+        end_coords = {
+            1:(3,0),
+            2:(3,1),
+            3:(3,2)
+        }
+        grid = Grid.create(spaces, 3, start_coords, end_coords)  
+
+
+        spaces = np.array([[ 1,  2,  3,  3],
+                           [ 1,  2,  3,  3],
+                           [ 1,  2,  3,  3],
+                           [ 1,  2,  3,  3]])
+
+        tips = {
+            1:(2,0),
+            2:(2,1),
+            3:(3,3),
+        }
+
+        state = Grid.State(grid, spaces,tips)
+        self.assertFalse(state.is_winning())
+        possible_actions = state.possible_actions()
+        self.assertEqual(len(possible_actions), 6)  
+
+        # Get ourselves to the winning state. There shouldn't
+        # be any more possible actions left.
+        state = state.next_state((1,2))
+        state = state.next_state((2,2))
+        state = state.next_state((3,3))
+        possible_actions = state.possible_actions()
+        self.assertEqual(len(possible_actions), 0)
+        self.assertTrue(state.is_winning())
+
+
     def test_basic_grid(self):
         # Create grid.
         grid = Grid(filename="levels/test_level.txt")
 
-    #     # Originally this is 5241
-    #     print("Number of valid states: ", len(grid.possible_states))
-
-        #print("Number of valid states part 2: ", len(grid.generate_all_states_test()))
+        all_states = grid.generate_all_states()
+        winning = 0
+        for state in all_states:
+            winning = winning + state.is_winning()
+            if state.is_winning():
+                print(state.spaces)
+        print("Num states: ", len(all_states))
+        print("Num winning: ", winning)
 
     #     return
 

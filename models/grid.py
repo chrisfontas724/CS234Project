@@ -91,6 +91,15 @@ class Grid:
             self.spaces = spaces.copy()
             self.tips = tips.copy()
 
+        def __eq__(self, other):
+            return np.array_equal(self.spaces, other.spaces) and \
+                   self.tips == other.tips
+
+        def __ne__(self, other):
+            return not self.__eq__(other)
+
+        def __hash__(self):
+            return hash((str(self.spaces.tolist()), str(self.tips)))
 
         # Fill this out to use in the test down below.
         def is_viable_action(self, action):
@@ -110,21 +119,23 @@ class Grid:
                 if new_pos == value:
                     return False
 
-            # Make sure the new position dosn't intersect a fixed
+            # Make sure the new position doesn't intersect a fixed
             # ending point, unless its the ending point of its color.
             for key, value in self.info.color_end_coords.items():
                 if key != action[0] and new_pos == value:
                     return False
 
             # Make sure the new position doesn't already contain
-            # the current flow.
-            return self.spaces[new_pos[0]][new_pos[1]] != action[0]
+            # the current flow *UNLESS* it's the end state, then
+            # we can go into it (this is important for determining
+            # if we are in the winning state or not).
+            return (self.spaces[new_pos[0]][new_pos[1]] != action[0] or new_pos == self.info.color_end_coords[action[0]])
 
 
         # Given an input state, return a list of possible actions that can be
         # taken from the provided state. At most, the number of moves is
         # (num_colors * num_directions).
-        def possible_actions(self, state):
+        def possible_actions(self):
         
             # The list of all action tuples you can take from the
             # current board configuration.
@@ -176,7 +187,7 @@ class Grid:
             # must be reset.
             def break_flow():
                 existing_value = self.spaces[new_tip[0]][new_tip[1]]
-                if existing_value != 0:
+                if existing_value != 0 and existing_value != color:
                     for row in range(self.info.size):
                         for col in range(self.info.size):
                             item = int(self.spaces[row][col])
@@ -199,164 +210,42 @@ class Grid:
             return result
 
 
-        # Checks to see if the provided state is a valid configuration or not. For
-        # a state to be valid, all instances of a particular color must be connected
-        # to eachother. For example, if the starting red point is at (0,0) and the
-        # ending red point is at (3,3) there cannot be a random red point at (0,3).
-        # There must be a series of red points leadng up to (0,3) from the starting
-        # point for this configuration to be valid.
-        def is_valid(self):
-            def find_connection(space, x, y, visited):
-                if x - 1 >= 0 and self.spaces[x-1][y] == space and ((x,y), (x-1, y)) not in visited and ((x-1, y), (x,y)) not in visited:
-                    return (x-1, y)
-                if x + 1 < self.info.size and self.spaces[x+1][y] == space and ((x,y), (x+1, y)) not in visited and((x+1, y), (x,y)) not in visited:
-                    return (x+1, y)
-                if y - 1 >= 0 and self.spaces[x][y-1] == space and ((x,y), (x, y-1)) not in visited and ((x, y-1), (x,y)) not in visited:
-                    return (x, y-1)
-                if y + 1 < self.info.size and self.spaces[x][y+1] == space and ((x,y), (x, y+1)) not in visited and ((x, y+1), (x,y)) not in visited:
-                    return (x, y+1)
-                return (-1,-1)
-
-            visited = set()
-            start_visited = set()
-            end_visited = set()
-            for x in range(self.info.size):
-                for y in range(self.info.size):
-                    space = self.spaces[x][y]
-                    if space != 0:
-                        start = self.info.color_start_coords[space]
-                        end = self.info.color_end_coords[space]
-                        if (x,y) != start and (x,y) != end:
-                            connection = find_connection(space, x,y, visited)
-                            if connection == (-1,-1) or connection in start_visited or connection in end_visited:
-                                print("Visited: ", visited)
-                                print("NOOOO: ", connection)
-                                print("SPACE: ", (x,y))
-                                return False
-                            else:
-                                visited.add(((x,y), connection))
-                                if connection == start:
-                                    start_visited.add(start)
-                                if connection == end:
-                                    end_visited.add(end)
-            return True
-
         # Checks to see if the provided state is a winning state or not. To be
         # a winning state, all spaces must be covered and all starting and end
         # flows must be connected for every color.
-        def in_winning(self):
-            # At the very least, the winning state has to be valid...
-            if not self.is_valid_state(state, size, start_coords, end_coords):
-                return False
-
+        def is_winning(self):
             # Make sure the are no 0s on the board.
-            for x in range(size):
-                for y in range(size):
-                    if state[x][y] == 0:
+            for x in range(self.info.size):
+                for y in range(self.info.size):
+                    if self.spaces[x][y] == 0:
                         return False
 
             # Finally, make sure all the flows have reached their end goal.
-            for color in range(1, num_cols + 1):
-                if  self.tips[color] != self.info.color_end_coords[color]:
+            for color in range(1, self.info.num_cols + 1):
+                if self.tips[color] != self.info.color_end_coords[color]:
                     return False
         
             # We win!
             return True
 
-
-    # Removes all states that are not possible from the provided list.
-    def prune_impossible_states(self, states):
-        result = []
-        for state in states:
-             if Grid.is_valid_state(state, self.size, self.color_start_coords, self.color_end_coords):
-                result.append(state)
-        return result
-
-
-    # Given an initial board configuration, generate and return a
-    # vector of all possible grid configurations. The total number
-    # for a 4x4 grid with 3 colors should be roughly around 1M.
-    # However, with pruning, this number decreases significantly,
-    # and the total number of potential boards for a 4x4 grid goes
-    # down to only about 5K or so.
-
-
-    def generate_all_states_test(self):
-
-        result = []
-        stack = [self.start_state]
+    # Generate all possibl states by iterating over all possible actions. For every
+    # state, we loop over all possbie
+    def generate_all_states(self):
+        result = list()
         seen = set()
+        stack = [self.start_state]
 
-        while len(stack) > 0:
+        while stack:
             curr = stack.pop()
             result.append(curr)
-            #print("Result size: ", len(result))
-            seen.add(curr)
-            for color in range(1, self.num_cols + 1):
-                for action in action_map:
-                    try:
-                        next_state = curr.next_state((color, action))
-                        if not next_state.is_valid():
-                            print("AAAHHHHHHHH")
-                            print(next_state.spaces)
-                            exit(1)
-                       # print("Whooooo")
-                        #print(next_state.spaces)
-                        #print("\n")
-                        if next_state.is_valid() and next_state not in seen:
-                            stack.append(next_state)
-                    except:
-                        pass
+            possible_actions = curr.possible_actions()
+            for action in possible_actions:
+                next_state = curr.next_state(action)
+                if next_state not in seen:
+                    stack.append(next_state)
+                    seen.add(next_state)
         return result
 
-        # sys.setrecursionlimit(100000)
-
-        # def generate_recursive(current_state):
-        #     result = []
-        #     for color in range(1, self.num_cols + 1):
-        #         for action in action_map:
-        #             try:
-        #                 next_state = current_state.next_state((color, action))
-        #                 result.append(next_state)
-        #                 result = result + generate_recursive(next_state)
-        #             except:
-        #                 pass
-        #     return result
-        # return [self.start_state] + generate_recursive(self.start_state)
-
-
-
-
-    def generate_all_states(self, initial_state):
-        ranges = list()
-        for x in range(self.size):
-            for y in range(self.size):
-                # If the initial state already has a value at a coordinate (x,y) then
-                # that is a fixed point that should not be altered. This is represented
-                # by setting its range to (val, val+1) so that its always set to |val|.
-                # Otherwise, the range should be [0, num_cols + 1).
-                val = int(initial_state[x][y])
-                ranges.append(range(val,val+1) if val != 0 else range(0, self.num_cols+1))
-
-        # itertools.product is just a compact way of doing a series of nested iterations.
-        # Each nested iteration uses the range provided at its index. We use a flat
-        # representation of the grid here because that's what itertools.product() takes
-        # in as an argument. We unflatten it later with np.reshape().
-        flat_result = list(itertools.product(*ranges, repeat=1))
-
-        # The number of total possible states should be equal to (num_cols+1) ^ (num_empty_spaces).
-        # The base is num_cols + 1 to account for empty spaces. So if your colors are [1,2,3], the
-        # possible values for a non-empty space are [0,1,2,3].
-        assert len(flat_result) == np.power(self.num_cols + 1, (self.size * self.size) - 2*self.num_cols)
-
-        # Now we have to reshape the result so it can be a (sizexsize) grid.
-        result = [np.reshape(x, (-1, self.size)) for x in flat_result]
-
-        # Prune impossible states
-        result = self.prune_impossible_states(result)
-
-        # Finally return the result.
-        return result
 
 
     # Resets the grid to the starting state, before any moves have been made.
