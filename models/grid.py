@@ -207,20 +207,21 @@ class Grid:
     # Checks to see if the provided state is a winning state or not. To be
     # a winning state, all spaces must be covered and all starting and end
     # flows must be connected for every color.
-    def in_winning_state(self, state):
+    @staticmethod
+    def in_winning_state(state, size, num_cols, start_coords, end_coords):
         # At the very least, the winning state has to be valid...
-        if not Grid.is_valid_state(state, self.size, self.color_start_coords, self.color_end_coords):
+        if not Grid.is_valid_state(state, size, start_coords, end_coords):
             return False
 
         # Make sure the are no 0s on the board.
-        for x in range(self.size):
-            for y in range(self.size):
+        for x in range(size):
+            for y in range(size):
                 if state[x][y] == 0:
                     return False
 
         # Finally, make sure all the flows have reached their end goal.
-        for color in range(1, self.num_cols + 1):
-            if Grid.get_flow_tip(state, self.size, color, self.color_start_coords) != self.color_end_coords[color]:
+        for color in range(1, num_cols + 1):
+            if Grid.get_flow_tip(state, size, color, start_coords) != end_coords[color]:
                 return False
         
         # We win!

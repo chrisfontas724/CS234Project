@@ -137,6 +137,48 @@ class TestGridFunctions(unittest.TestCase):
         self.assertEqual(Grid.get_flow_tip(grid, 4, 3, start_coords), (1,1))
 
 
+    # Test to see if we can determine a winning board or not.
+    def test_winning_board(self):
+        state = np.array([[ 1,  2,  3,  0],
+                         [ 0,  0,  0,  0],
+                         [ 0,  0,  0,  0],
+                         [ 1,  2,  3,  0]])
+
+        start_coords = {
+            1:(0,0),
+            2:(0,1),
+            3:(0,2)
+        }
+        end_coords = {
+            1:(3,0),
+            2:(3,1),
+            3:(3,2)
+        }
+
+        # Starting state is NOT the winning state.
+        self.assertFalse(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
+
+        # Flows are all connected but there are still 0s.
+        state = np.array([[ 1,  2,  3,  0],
+                          [ 1,  2,  3,  0],
+                          [ 1,  2,  3,  0],
+                          [ 1,  2,  3,  0]])
+        self.assertFalse(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
+
+        # Now we win!
+        state = np.array([[ 1,  2,  3,  3],
+                          [ 1,  2,  3,  3],
+                          [ 1,  2,  3,  3],
+                          [ 1,  2,  3,  3]])
+        self.assertTrue(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
+
+        # This other configuration should also win.
+        state = np.array([[ 1,  2,  3,  3],
+                          [ 1,  2,  2,  3],
+                          [ 1,  2,  2,  3],
+                          [ 1,  2,  3,  3]])
+        self.assertTrue(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
+
     def test_basic_grid(self):
         # Create grid.
         grid = Grid(filename="levels/test_level.txt")
