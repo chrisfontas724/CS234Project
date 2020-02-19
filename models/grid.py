@@ -194,8 +194,11 @@ class Grid:
     # a winning state, all spaces must be covered and all starting and end
     # flows must be connected for every color.
     def in_winning_state(self, state):
+        # At the very least, the winning state has to be valid...
+        if not Grid.is_valid_state(state, self.size, self.color_start_coords, self.color_end_coords):
+            return False
         # TODO
-        pass
+        return True
 
 
      # Fill this out to use in the test down below.
