@@ -139,7 +139,7 @@ class TestGridFunctions(unittest.TestCase):
 
 
     def test_basic_grid(self):
-        # Create grid.
+        #Create grid.
         grid = Grid(filename="levels/test_level.txt")
 
         all_states = grid.generate_all_states()
@@ -151,6 +151,16 @@ class TestGridFunctions(unittest.TestCase):
                 print(state.spaces)
         self.assertTrue(winning, 2)
 
+
+        grid2 = Grid(filename="levels/easy-1.txt")
+        all_states = grid2.generate_all_states()
+        print("Total states: ", len(all_states))
+        winning = 0
+        for state in all_states:
+            winning = winning + state.is_winning()
+            if state.is_winning():
+                print(state.spaces)
+        self.assertTrue(winning, 1)
     #     return
 
     #     # Make sure the start flow locations are accurate.

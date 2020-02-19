@@ -138,14 +138,13 @@ class Grid:
             # the current flow *UNLESS* it's the end state, then
             # we can go into it (this is important for determining
             # if we are in the winning state or not).
-            return (self.spaces[new_pos[0]][new_pos[1]] != action[0] or new_pos == self.info.color_end_coords[action[0]])
-
+            return (self.spaces[new_pos[0]][new_pos[1]] != action[0] or \
+                    new_pos == self.info.color_end_coords[action[0]])
 
         # Given an input state, return a list of possible actions that can be
         # taken from the provided state. At most, the number of moves is
         # (num_colors * num_directions).
         def possible_actions(self):
-        
             # The list of all action tuples you can take from the
             # current board configuration.
             result = list()
@@ -244,6 +243,7 @@ class Grid:
         result = set()
         seen = set()
         stack = [self.start_state]
+
         while stack:
             curr = stack.pop()
             result.add(curr)
