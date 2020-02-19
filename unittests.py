@@ -8,7 +8,6 @@ class TestGridFunctions(unittest.TestCase):
     # Test to make sure that the static Grid function |is_valid_state| works
     # as intended.
     def test_valid_states(self):
-        return
         grid = np.array([[ 1,  2,  3,  0],
                          [ 0,  0,  0,  0],
                          [ 0,  0,  0,  0],
@@ -95,7 +94,6 @@ class TestGridFunctions(unittest.TestCase):
 
     # Test to make sure we are calculating flow tips correctly.
     def test_flow_tips(self):
-        return
         grid = np.array([[ 1,  2,  3,  0],
                          [ 0,  0,  0,  0],
                          [ 0,  0,  0,  0],
@@ -239,7 +237,6 @@ class TestGridFunctions(unittest.TestCase):
 
     # Test to see if we can determine a winning board or not.
     def test_winning_board(self):
-        return
         state = np.array([[ 1,  2,  3,  0],
                          [ 0,  0,  0,  0],
                          [ 0,  0,  0,  0],
@@ -281,7 +278,6 @@ class TestGridFunctions(unittest.TestCase):
         self.assertTrue(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
 
     def test_basic_grid(self):
-        return
         # Create grid.
         grid = Grid(filename="levels/test_level.txt")
 
