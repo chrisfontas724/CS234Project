@@ -9,6 +9,8 @@ class TestGridFunctions(unittest.TestCase):
         # Create grid.
         grid = Grid(filename="levels/test_level.txt")
 
+        print("Number of valid states: ", len(grid.possible_states))
+
         # Make sure the start flow locations are accurate.
         self.assertEqual(grid.color_start_coords[1], (0,0))
         self.assertEqual(grid.color_start_coords[2], (0,1))
@@ -41,8 +43,36 @@ class TestGridFunctions(unittest.TestCase):
         self.assertTrue('Action is not viable' in str(context.exception))
 
 
+    # Test to make sure that the static Grid function |is_valid_state| works
+    # as intended.
+    def test_valid_states(self):
+        grid = np.array([[ 1,  2,  3,  0],
+                         [ 0,  0,  0,  0],
+                         [ 0,  0,  0,  0],
+                         [ 0,  0,  0,  0],
+                         [ 1,  2,  3,  0]])
 
+        start_coords = {
+            1:(0,0),
+            2:(0,1),
+            3:(0,2)
+        }
+        end_coords = {
+            1:(3,0),
+            2:(3,1),
+            3:(3,3)
+        }
 
+        # Default starter grid should work just fine.
+        self.assertTrue(Grid.is_valid_state(grid, 4, start_coords, end_coords))
+
+        # Add a color to the middle of the grid that is not connected.
+        grid[2][2] = 2
+        self.assertFalse(Grid.is_valid_state(grid, 4, start_coords, end_coords))
+
+        # Now connect the 2 to the starting 2 and it should be valid again.
+        grid[1][2] = 2
+        self.assertTrue(Grid.is_valid_state(grid, 4, start_coords, end_coords))
 
 # Program entry point.
 if __name__ == "__main__":

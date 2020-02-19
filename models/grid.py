@@ -68,7 +68,8 @@ class Grid:
     # TODO: Make a state subclass and make the flow tips a part of the
     # state rather than a global aspect of the whole grid itself.
     class State:
-        def __init__(self):
+        def __init__(self, grid):
+            self.grid = grid
             self.color_flow_tips = dict()
 
 
@@ -94,6 +95,55 @@ class Grid:
                         self.color_start_coords[item] = (row, col)
                         self.color_flow_tips[item] = (row, col)
         self.current_state = self.spaces
+
+
+    # Checks to see if the provided state is a valid configuration or not. For
+    # a state to be valid, all instances of a particular color must be connected
+    # to eachother. For example, if the starting red point is at (0,0) and the
+    # ending red point is at (3,3) there cannot be a random red point at (0,3).
+    # There must be a series of red points leadng up to (0,3) from the starting
+    # point for this configuration to be valid.
+    @staticmethod
+    def is_valid_state(state, size, start_coords, end_coords):
+
+        def find_connection(space, x, y, visited):
+            if x - 1 >= 0 and state[x-1][y] == space and (x-1, y) not in visited:
+                return (x-1, y)
+            if x + 1 < size and state[x+1][y] == space and (x+1, y) not in visited:
+                return (x+1, y)
+            if y - 1 >= 0 and state[x][y-1] == space and (x, y-1) not in visited:
+                return (x, y-1)
+            if y + 1 < size and state[x][y+1] == space and (x, y+1) not in visited:
+                return (x, y+1)
+            return (-1,-1)
+
+        visited = set()
+        for x in range(size):
+            for y in range(size):
+                space = state[x][y]
+                if space != 0:
+                    start = start_coords[space]
+                    end = end_coords[space]
+                    if (x,y) != start and (x,y) != end:
+                        # print("XY: ", (x,y))
+                        # print("start: ", start)
+                        # print("end: ", end)
+                        connection = find_connection(space, x,y, visited)
+                        if connection == (-1,-1):
+                            return False
+                        else:
+                            visited.add(connection)
+        return True
+
+
+    # Removes all states that are not possible from the provided list.
+    def prune_impossible_states(self, states):
+        result = []
+        for state in states:
+             if Grid.is_valid_state(state, self.size, self.color_start_coords, self.color_end_coords):
+                result.append(state)
+        return result
+
 
     # Given an initial board configuration, generate and return a
     # vector of all possible grid configurations. The total number
@@ -124,7 +174,17 @@ class Grid:
         assert len(flat_result) == np.power(self.num_cols + 1, (self.size * self.size) - 2*self.num_cols)
 
         # Now we have to reshape the result so it can be a (sizexsize) grid.
-        return [np.reshape(x, (-1, self.size)) for x in flat_result]
+        result = [np.reshape(x, (-1, self.size)) for x in flat_result]
+
+        print("Before pruning: ", len(result))
+
+        # Prune impossible states
+        result = self.prune_impossible_states(result)
+
+        print("After pruning: ", len(result))
+
+        # Finally return the result.
+        return result
 
 
     # Checks to see if the provided state is a winning state or not. To be
