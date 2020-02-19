@@ -152,8 +152,22 @@ class TestGridFunctions(unittest.TestCase):
         self.assertTrue(winning, 2)
 
 
-        grid2 = Grid(filename="levels/easy-1.txt")
+        grid2 = Grid(filename="levels/test_level_2.txt")
         all_states = grid2.generate_all_states()
+        print("Total states: ", len(all_states))
+        winning = 0
+        for state in all_states:
+            winning = winning + state.is_winning()
+            if state.is_winning():
+                print(state.spaces)
+        self.assertTrue(winning, 3)
+
+        return
+
+        # This takes a while to run, so remove the |return| up
+        # above if you want to see it run too.
+        grid3 = Grid(filename="levels/easy-1.txt")
+        all_states = grid3.generate_all_states()
         print("Total states: ", len(all_states))
         winning = 0
         for state in all_states:
