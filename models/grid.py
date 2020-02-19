@@ -142,9 +142,9 @@ class Grid:
     # Given an initial board configuration, generate and return a
     # vector of all possible grid configurations. The total number
     # for a 4x4 grid with 3 colors should be roughly around 1M.
-    # It should be possible to tighten the number of possible states
-    # by disallowing certain impossible configurations, but for now
-    # we are defining states more loosely for simplicity.
+    # However, with pruning, this number decreases significantly,
+    # and the total number of potential boards for a 4x4 grid goes
+    # down to only about 5K or so.
     def generate_all_states(self, initial_state):
         ranges = list()
         for x in range(self.size):
@@ -170,12 +170,8 @@ class Grid:
         # Now we have to reshape the result so it can be a (sizexsize) grid.
         result = [np.reshape(x, (-1, self.size)) for x in flat_result]
 
-        print("Before pruning: ", len(result))
-
         # Prune impossible states
         result = self.prune_impossible_states(result)
-
-        print("After pruning: ", len(result))
 
         # Finally return the result.
         return result
