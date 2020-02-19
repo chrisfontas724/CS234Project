@@ -63,29 +63,53 @@ class TestGridFunctions(unittest.TestCase):
             3:(3,3)
         }
 
+        def print_grid(valid):
+            print("Valid" if valid else "NOT valid")
+            print(grid)
+            print("\n")
+
         # Default starter grid should work just fine.
-        print(grid)
+        print_grid(True)
         self.assertTrue(Grid.is_valid_state(grid, 4, start_coords, end_coords))
 
         # Add a color to the middle of the grid that is not connected.
         grid[2][2] = 2
-        print(grid)
+        print_grid(False)
         self.assertFalse(Grid.is_valid_state(grid, 4, start_coords, end_coords))
 
         # Now add another 2 that connects with the above 2, but neither connects
         # with the starting 2.
         grid[1][2] = 2
-        print(grid)
+        print_grid(False)
         self.assertFalse(Grid.is_valid_state(grid, 4, start_coords, end_coords))
 
-        # Turn the 2 into a 3 and it should be invalid once more.
+        # Now add another 2 so that all the 2s connect to the starting 2.
+        grid[1][1] = 2
+        print_grid(True)
+        self.assertFalse(Grid.is_valid_state(grid, 4, start_coords, end_coords))
+
+
+        # Remove the above 2, turn the other 2 into a 3 and it should be invalid once more.
+        grid[1][1] = 0
         grid[1][2] = 3
-        print(grid)
+        print_grid(False)
         self.assertFalse(Grid.is_valid_state(grid, 4, start_coords, end_coords))
 
         # Turn the other 2 into a 3, and now we should have 3 connected 3s.
         grid[2][2] = 3
-        print(grid)
+        print_grid(True)
+        self.assertTrue(Grid.is_valid_state(grid, 4, start_coords, end_coords))
+
+        # Add a 3 in the corner. This should be false since we can't have two
+        # connections with the starting or ending colors.
+        grid[0][3] = 3
+        print_grid(False)
+        self.assertFalse(Grid.is_valid_state(grid, 4, start_coords, end_coords))
+
+        # Now make a grid of 3s around the starting 3 - This should be valid.
+        grid[2][2] = 0
+        grid[1][3] = 3
+        print_grid(True)
         self.assertTrue(Grid.is_valid_state(grid, 4, start_coords, end_coords))
 
 # Program entry point.

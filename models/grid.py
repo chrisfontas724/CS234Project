@@ -118,6 +118,8 @@ class Grid:
             return (-1,-1)
 
         visited = set()
+        start_visited = set()
+        end_visited = set()
         for x in range(size):
             for y in range(size):
                 space = state[x][y]
@@ -126,10 +128,14 @@ class Grid:
                     end = end_coords[space]
                     if (x,y) != start and (x,y) != end:
                         connection = find_connection(space, x,y, visited)
-                        if connection == (-1,-1):
+                        if connection == (-1,-1) or connection in start_visited or connection in end_visited:
                             return False
                         else:
                             visited.add(((x,y), connection))
+                            if connection == start:
+                                start_visited.add(start)
+                            if connection == end:
+                                end_visited.add(end)
         return True
 
 
