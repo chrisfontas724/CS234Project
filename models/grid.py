@@ -107,13 +107,13 @@ class Grid:
     def is_valid_state(state, size, start_coords, end_coords):
 
         def find_connection(space, x, y, visited):
-            if x - 1 >= 0 and state[x-1][y] == space and (x-1, y) not in visited:
+            if x - 1 >= 0 and state[x-1][y] == space and ((x,y), (x-1, y)) not in visited and ((x-1, y), (x,y)) not in visited:
                 return (x-1, y)
-            if x + 1 < size and state[x+1][y] == space and (x+1, y) not in visited:
+            if x + 1 < size and state[x+1][y] == space and ((x,y), (x+1, y)) not in visited and((x+1, y), (x,y)) not in visited:
                 return (x+1, y)
-            if y - 1 >= 0 and state[x][y-1] == space and (x, y-1) not in visited:
+            if y - 1 >= 0 and state[x][y-1] == space and ((x,y), (x, y-1)) not in visited and ((x, y-1), (x,y)) not in visited:
                 return (x, y-1)
-            if y + 1 < size and state[x][y+1] == space and (x, y+1) not in visited:
+            if y + 1 < size and state[x][y+1] == space and ((x,y), (x, y+1)) not in visited and ((x, y+1), (x,y)) not in visited:
                 return (x, y+1)
             return (-1,-1)
 
@@ -125,14 +125,11 @@ class Grid:
                     start = start_coords[space]
                     end = end_coords[space]
                     if (x,y) != start and (x,y) != end:
-                        # print("XY: ", (x,y))
-                        # print("start: ", start)
-                        # print("end: ", end)
                         connection = find_connection(space, x,y, visited)
                         if connection == (-1,-1):
                             return False
                         else:
-                            visited.add(connection)
+                            visited.add(((x,y), connection))
         return True
 
 
