@@ -190,6 +190,14 @@ class Grid:
         return result
 
 
+    # Find the tip of the flow for a particular color
+    # for a particular state. The flow tip is where
+    # any subsequent actions need to be taken from.
+    @staticmethod
+    def get_flow_tip(state, color, start_coords):
+        pass
+
+
     # Checks to see if the provided state is a winning state or not. To be
     # a winning state, all spaces must be covered and all starting and end
     # flows must be connected for every color.
