@@ -65,14 +65,6 @@ class Grid:
         self.possible_states = self.generate_all_states(self.spaces)
 
 
-    # TODO: Make a state subclass and make the flow tips a part of the
-    # state rather than a global aspect of the whole grid itself.
-    class State:
-        def __init__(self, grid):
-            self.grid = grid
-            self.color_flow_tips = dict()
-
-
     # Resets the grid to the starting state, before any moves have been made.
     # Declare dictionaries to store the starting and ending positions for the
     # "flows" for each color. For simplicity, and due to the fact that it doesn't
@@ -93,7 +85,6 @@ class Grid:
                         self.color_end_coords[item] = (row, col)
                     else:
                         self.color_start_coords[item] = (row, col)
-                        self.color_flow_tips[item] = (row, col)
         self.current_state = self.spaces
 
 
@@ -227,7 +218,7 @@ class Grid:
      # Fill this out to use in the test down below.
     def is_viable_action(self, state, action):
         # TODO: Fill this out
-        tip = self.color_flow_tips[action[0]]
+        tip = Grid.get_flow_tip(state, self.size, action[0], self.color_start_coords)
         direction = action_map[action[1]]
         new_pos = (tip[0] + direction[0], tip[1] + direction[1])
 
@@ -296,7 +287,7 @@ class Grid:
         # We can  only move a color from its endpoint, so we have to find what
         # that endpoint is given the current state of the board. Then we can
         # append the action to it.
-        tip = self.color_flow_tips[color]
+        tip = Grid.get_flow_tip(input_state, self.size, color, self.color_start_coords)
 
         # Update the resulting state based on the move.
         direction = action_map[action]
@@ -323,12 +314,6 @@ class Grid:
 
         # Update the board.
         result[new_tip[0]][new_tip[1]] = color 
-
-        # We have to update the tip before exiting.
-        self.color_flow_tips[color] = new_tip
-
-        # Set the current state to be the result.
-        self.current_state = result
 
         # return the state.
         return result

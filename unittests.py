@@ -166,7 +166,7 @@ class TestGridFunctions(unittest.TestCase):
         # current tip for red should be at (1,0)
         next_state = grid.next_state(grid.spaces, (1,2))
         self.assertEqual(len(grid.possible_actions(next_state)), 5)
-        self.assertEqual(grid.color_flow_tips[1], (1,0))
+        self.assertEqual(Grid.get_flow_tip(next_state, grid.size, 1, grid.color_start_coords), (1,0))
 
         # Now try to move red back up, which it shouldn't be able to
         # do because that's where it just came from.
