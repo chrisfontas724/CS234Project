@@ -8,7 +8,6 @@ class TestGridFunctions(unittest.TestCase):
     # Test to make sure that the static Grid function |is_valid_state| works
     # as intended.
     def test_valid_states(self):
-        return
         grid = np.array([[ 1,  2,  3,  0],
                          [ 0,  0,  0,  0],
                          [ 0,  0,  0,  0],
@@ -149,7 +148,6 @@ class TestGridFunctions(unittest.TestCase):
 
     # Do some more advanced flow tip testing on a 5x5 grid with a single color.
     def test_flow_tips_part_2(self):
-        return
         state = np.array([[ 1,  0,  0,  0, 0],
                           [ 0,  0,  0,  0, 0],
                           [ 0,  0,  1,  0, 0],
@@ -163,14 +161,14 @@ class TestGridFunctions(unittest.TestCase):
             1:(0,0),
         }
 
-        self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords), start_coords[1])
+        self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), start_coords[1])
 
 
         state[2][1] = 1
         state[3][1] = 1
         state[3][2] = 1
 
-        self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords), (2,1))
+        self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (2,1))
 
 
         state[3][3] = 1
@@ -179,12 +177,11 @@ class TestGridFunctions(unittest.TestCase):
 
         print("GRID: ")
         print(state)
-        self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords), (3,3))
+        self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords, end_coords), (3,3))
 
 
     # Test to see if we can determine a winning board or not.
     def test_winning_board(self):
-        return
         state = np.array([[ 1,  2,  3,  0],
                          [ 0,  0,  0,  0],
                          [ 0,  0,  0,  0],
@@ -226,7 +223,6 @@ class TestGridFunctions(unittest.TestCase):
         self.assertTrue(Grid.in_winning_state(state, 4, 3, start_coords, end_coords))
 
     def test_basic_grid(self):
-        return
         # Create grid.
         grid = Grid(filename="levels/test_level.txt")
 
@@ -255,7 +251,7 @@ class TestGridFunctions(unittest.TestCase):
         # current tip for red should be at (1,0)
         next_state = grid.next_state(grid.spaces, (1,2))
         self.assertEqual(len(grid.possible_actions(next_state)), 5)
-        self.assertEqual(Grid.get_flow_tip(next_state, grid.size, 1, grid.color_start_coords), (1,0))
+        self.assertEqual(Grid.get_flow_tip(next_state, grid.size, 1, grid.color_start_coords, grid.color_end_coords), (1,0))
 
         # Now try to move red back up, which it shouldn't be able to
         # do because that's where it just came from.
