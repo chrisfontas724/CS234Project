@@ -52,7 +52,7 @@ def value_iteration(grid, gamma=0.9, tol=1e-3):
 				tuple = get_tuple(state, action)
 				new_value = 0.
 
-				# (probability, nextstate, reward, terminal)
+				# (probability, nextstate, reward)
 				(probability, next_state, reward) = tuple
 				if not next_state in value_function:
 					value_function[next_state] = 0.
