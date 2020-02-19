@@ -38,21 +38,21 @@ class GridRenderer:
     # This function takes in a grid and renders it to the screen
     # so that we can visually keep track of the progress being
     # made by our algorithm(s).
-    def render(self, grid):
+    def render(self, state):
 
         # The dimensions in pixels each space/tile should take up.
-        pixels_per_tile = int(self.size / grid.size)
+        pixels_per_tile = int(self.size / state.info.size)
 
         # Draw the grid lines first. Use grid.size + 1 so that a
         # line is drawn at the edge too.
-        for i in range(grid.size+1):
+        for i in range(state.info.size+1):
             self.img = cv2.line(self.img, (i*pixels_per_tile,0), (i*pixels_per_tile,500), (255,255,0), 1)
             self.img = cv2.line(self.img, (0, i*pixels_per_tile), (500, i*pixels_per_tile), (255,255,0), 1)
 
         # Now draw the circles.
-        for row in range(grid.size):
-            for col in range(grid.size):
-                item = int(grid.current_state[row][col])
+        for row in range(state.info.size):
+            for col in range(state.info.size):
+                item = int(state.spaces[row][col])
                 if item is not 0:
                     border = int(pixels_per_tile / 10)
                     radius = int((pixels_per_tile - border)/2)

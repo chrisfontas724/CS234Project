@@ -28,7 +28,7 @@ def main():
     renderer = GridRenderer(options.level)
 
     # Draw the grid to the screen.
-    renderer.render(grid)
+    renderer.render(grid.start_state)
 
     # Close the window.
     renderer.tear_down()
