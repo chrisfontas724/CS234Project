@@ -77,8 +77,14 @@ class Grid:
                 self.spaces[counter-1] = row
 
             counter += 1
-
-            self.num_cols = 3 # HACK
+            
+             # Count the number of colors.
+            color_set = set()
+            for x in range(self.size):
+                for y in range(self.size):
+                    if self.spaces[x][y] != 0:
+                        color_set.add(self.spaces[x][y])
+            self.num_cols = len(color_set)
 
         file.close()
 
@@ -235,13 +241,12 @@ class Grid:
     # state, and then placing the newly generated state onto the stack so the process
     # can be repeated until all states have been covered.
     def generate_all_states(self):
-        result = list()
+        result = set()
         seen = set()
         stack = [self.start_state]
-
         while stack:
             curr = stack.pop()
-            result.append(curr)
+            result.add(curr)
             possible_actions = curr.possible_actions()
             for action in possible_actions:
                 next_state = curr.next_state(action)

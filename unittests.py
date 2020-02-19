@@ -143,6 +143,7 @@ class TestGridFunctions(unittest.TestCase):
         grid = Grid(filename="levels/test_level.txt")
 
         all_states = grid.generate_all_states()
+        print("Total states: ", len(all_states))
         winning = 0
         for state in all_states:
             winning = winning + state.is_winning()
