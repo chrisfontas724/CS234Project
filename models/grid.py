@@ -181,7 +181,7 @@ class Grid:
     # for a particular state. The flow tip is where
     # any subsequent actions need to be taken from.
     @staticmethod
-    def get_flow_tip(state, size, color, start_coords):
+    def get_flow_tip(state, size, color, start_coords, end_coords):
         visited = set()
         flow_tip = start_coords[color]
         visited.add(flow_tip)
@@ -190,11 +190,16 @@ class Grid:
             for action in range(4):
                 direction = action_map[action]
                 next_spot = (flow_tip[0] + direction[0], flow_tip[1] + direction[1])
-                #print("NEXT SPOT: ", next_spot)
+                print("NEXT SPOT: ", next_spot)
+
+                if next_spot == end_coords[color]:
+                    flow_tip = next_spot
+                    break
+
                 if next_spot[0] >= 0 and next_spot[0] < size and next_spot[1] >=0 and next_spot[1] < size:
                     if state[next_spot[0]][next_spot[1]] == color and next_spot not in visited:
                         flow_tip = next_spot
-                        #print("TIP: ", flow_tip)
+                        print("TIP: ", flow_tip)
                         visited.add(flow_tip)
                         should_quit = False
                         break
@@ -220,7 +225,7 @@ class Grid:
 
         # Finally, make sure all the flows have reached their end goal.
         for color in range(1, num_cols + 1):
-            if Grid.get_flow_tip(state, size, color, start_coords) != end_coords[color]:
+            if Grid.get_flow_tip(state, size, color, start_coords, end_coords) != end_coords[color]:
                 return False
         
         # We win!
@@ -230,7 +235,7 @@ class Grid:
      # Fill this out to use in the test down below.
     def is_viable_action(self, state, action):
         # TODO: Fill this out
-        tip = Grid.get_flow_tip(state, self.size, action[0], self.color_start_coords)
+        tip = Grid.get_flow_tip(state, self.size, action[0], self.color_start_coords, self.color_end_coords)
         direction = action_map[action[1]]
         new_pos = (tip[0] + direction[0], tip[1] + direction[1])
 
@@ -299,7 +304,7 @@ class Grid:
         # We can  only move a color from its endpoint, so we have to find what
         # that endpoint is given the current state of the board. Then we can
         # append the action to it.
-        tip = Grid.get_flow_tip(input_state, self.size, color, self.color_start_coords)
+        tip = Grid.get_flow_tip(input_state, self.size, color, self.color_start_coords, self.color_end_coords)
 
         # Update the resulting state based on the move.
         direction = action_map[action]
