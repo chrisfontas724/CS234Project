@@ -136,6 +136,39 @@ class TestGridFunctions(unittest.TestCase):
         print(grid)
         self.assertEqual(Grid.get_flow_tip(grid, 4, 3, start_coords), (1,1))
 
+    # Do some more advanced flow tip testing on a 5x5 grid with a single color.
+    def test_flow_tips_part_2(self):
+        state = np.array([[ 1,  0,  0,  0, 0],
+                          [ 0,  0,  0,  0, 0],
+                          [ 0,  0,  1,  0, 0],
+                          [ 0,  0,  0,  0, 0],
+                          [ 0,  0,  0,  0, 0]])
+
+        start_coords = {
+            1:(2,2),
+        }
+        end_coords = {
+            1:(0,0),
+        }
+
+        self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords), start_coords[1])
+
+
+        state[2][1] = 1
+        state[3][1] = 1
+        state[3][2] = 1
+
+        self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords), (2,1))
+
+
+        state[3][3] = 1
+        print("Is valid?")
+        self.assertTrue(Grid.is_valid_state(state, 5, start_coords, end_coords))
+
+        print("GRID: ")
+        print(state)
+        self.assertEqual(Grid.get_flow_tip(state, 5, 1, start_coords), (3,3))
+
 
     # Test to see if we can determine a winning board or not.
     def test_winning_board(self):

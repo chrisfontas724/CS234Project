@@ -190,11 +190,14 @@ class Grid:
             for action in range(4):
                 direction = action_map[action]
                 next_spot = (flow_tip[0] + direction[0], flow_tip[1] + direction[1])
+                #print("NEXT SPOT: ", next_spot)
                 if next_spot[0] >= 0 and next_spot[0] < size and next_spot[1] >=0 and next_spot[1] < size:
                     if state[next_spot[0]][next_spot[1]] == color and next_spot not in visited:
                         flow_tip = next_spot
+                        #print("TIP: ", flow_tip)
                         visited.add(flow_tip)
                         should_quit = False
+                        break
             if should_quit:
                 break
                         
