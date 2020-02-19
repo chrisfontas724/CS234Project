@@ -211,7 +211,19 @@ class Grid:
         # At the very least, the winning state has to be valid...
         if not Grid.is_valid_state(state, self.size, self.color_start_coords, self.color_end_coords):
             return False
-        # TODO
+
+        # Make sure the are no 0s on the board.
+        for x in range(self.size):
+            for y in range(self.size):
+                if state[x][y] == 0:
+                    return False
+
+        # Finally, make sure all the flows have reached their end goal.
+        for color in range(1, self.num_cols + 1):
+            if Grid.get_flow_tip(state, self.size, color, self.color_start_coords) != self.color_end_coords[color]:
+                return False
+        
+        # We win!
         return True
 
 
