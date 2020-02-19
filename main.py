@@ -1,6 +1,7 @@
 import numpy as np
 from optparse import OptionParser
 from models.grid import Grid
+from models.vi_and_pi import value_iteration
 from renderer.renderer import GridRenderer
 
 # Use the OptionParser library to get command line arguments
@@ -27,8 +28,21 @@ def main():
     # Initialize the renderer.
     renderer = GridRenderer(options.level)
 
-    # Draw the grid to the screen.
-    renderer.render(grid.start_state)
+    # Perform value iteration
+    vf, policy = value_iteration(grid)
+    print("Completed value iteration!")
+
+    # Now let's try out our policy!
+    state = grid.start_state
+    while True:
+      state = state.next_state(policy[state])
+      
+      # Draw the grid to the screen.
+      renderer.render(state)
+
+      # Break if we're in the winning state.
+      if state.is_winning():
+        break
 
     # Close the window.
     renderer.tear_down()

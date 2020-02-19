@@ -276,9 +276,3 @@ class Grid:
                     else:
                         self.color_start_coords[item] = (row, col)
         self.start_state = Grid.State(self, self.spaces, self.color_start_coords)
-
-
-
-
-
-
