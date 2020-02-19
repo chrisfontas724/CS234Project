@@ -142,8 +142,6 @@ class TestGridFunctions(unittest.TestCase):
                           [ 1,  2,  3,  3],
                           [ 1,  2,  3,  3],
                           [ 1,  2,  3,  3]])
-        print("STATE: ")
-        print(state)
         self.assertEqual(Grid.get_flow_tip(state, 4, 1, start_coords, end_coords), end_coords[1])
         self.assertEqual(Grid.get_flow_tip(state, 4, 2, start_coords, end_coords), end_coords[2])
         self.assertEqual(Grid.get_flow_tip(state, 4, 3, start_coords, end_coords), end_coords[3])
