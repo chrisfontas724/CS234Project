@@ -49,7 +49,6 @@ class TestGridFunctions(unittest.TestCase):
         grid = np.array([[ 1,  2,  3,  0],
                          [ 0,  0,  0,  0],
                          [ 0,  0,  0,  0],
-                         [ 0,  0,  0,  0],
                          [ 1,  2,  3,  0]])
 
         start_coords = {
@@ -60,7 +59,7 @@ class TestGridFunctions(unittest.TestCase):
         end_coords = {
             1:(3,0),
             2:(3,1),
-            3:(3,3)
+            3:(3,2)
         }
 
         def print_grid(valid):
@@ -110,6 +109,26 @@ class TestGridFunctions(unittest.TestCase):
         grid[1][3] = 3
         print_grid(True)
         self.assertTrue(Grid.is_valid_state(grid, 4, start_coords, end_coords))
+
+        # Add an extra 3 so the 3s snake around a bit, this should still be valid.
+        grid[2][2] = 0
+        grid[1][3] = 3
+        grid[2][2] = 3
+        print_grid(True)
+        self.assertTrue(Grid.is_valid_state(grid, 4, start_coords, end_coords))
+
+        # Make sure that the winning state is valid.
+        grid[1,0] = 1
+        grid[2,0] = 1
+        grid[1,1] = 2
+        grid[2,1] = 2
+        grid[2,2] = 3
+        grid[3,2] = 3
+        grid[2,3] = 3
+        grid[3,3] = 3
+        print_grid(True)
+        self.assertTrue(Grid.is_valid_state(grid, 4, start_coords, end_coords))
+
 
 # Program entry point.
 if __name__ == "__main__":
