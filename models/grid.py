@@ -194,9 +194,24 @@ class Grid:
     # for a particular state. The flow tip is where
     # any subsequent actions need to be taken from.
     @staticmethod
-    def get_flow_tip(state, color, start_coords):
-        pass
-
+    def get_flow_tip(state, size, color, start_coords):
+        visited = set()
+        flow_tip = start_coords[color]
+        visited.add(flow_tip)
+        while True:
+            should_quit = True
+            for action in range(4):
+                direction = action_map[action]
+                next_spot = (flow_tip[0] + direction[0], flow_tip[1] + direction[1])
+                if next_spot[0] >= 0 and next_spot[0] < size and next_spot[1] >=0 and next_spot[1] < size:
+                    if state[next_spot[0]][next_spot[1]] == color and next_spot not in visited:
+                        flow_tip = next_spot
+                        visited.add(flow_tip)
+                        should_quit = False
+            if should_quit:
+                break
+                        
+        return flow_tip
 
     # Checks to see if the provided state is a winning state or not. To be
     # a winning state, all spaces must be covered and all starting and end
