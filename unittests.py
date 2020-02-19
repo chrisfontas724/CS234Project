@@ -5,102 +5,10 @@ import unittest
 
 class TestGridFunctions(unittest.TestCase):
 
-    # Test to make sure that the static Grid function |is_valid_state| works
-    # as intended.
-    def test_valid_states(self):
-        return
-        spaces = np.array([[ 1,  2,  3,  0],
-                           [ 0,  0,  0,  0],
-                           [ 0,  0,  0,  0],
-                           [ 1,  2,  3,  0]])
-
-        start_coords = {
-            1:(0,0),
-            2:(0,1),
-            3:(0,2)
-        }
-        end_coords = {
-            1:(3,0),
-            2:(3,1),
-            3:(3,2)
-        }
-
-        grid = Grid.create(spaces, 3, start_coords, end_coords)
-
-        def print_grid(valid, state):
-            print("Valid" if valid else "NOT valid")
-            print(state.spaces)
-            print("\n")
-
-        # Default starter grid should work just fine.
-        state = grid.start_state
-        print_grid(True, state)
-        self.assertTrue(state.is_valid())
-
-        # Add a color to the middle of the grid that is not connected.
-        state.spaces[2][2] = 2
-        print_grid(False, state)
-        self.assertFalse(state.is_valid())
-
-        # Now add another 2 that connects with the above 2, but neither connects
-        # with the starting 2.
-        state.spaces[1][2] = 2
-        print_grid(False, state)
-        self.assertFalse(state.is_valid())
-
-        # Now add another 2 so that all the 2s connect to the starting 2.
-        state.spaces[1][1] = 2
-        print_grid(True, state)
-        self.assertFalse(state.is_valid())
-
-        # Remove the above 2, turn the other 2 into a 3 and it should be invalid once more.
-        state.spaces[1][1] = 0
-        state.spaces[1][2] = 3
-        print_grid(False, state)
-        self.assertFalse(state.is_valid())
-
-        # Turn the other 2 into a 3, and now we should have 3 connected 3s.
-        state.spaces[2][2] = 3
-        print_grid(True, state)
-        self.assertTrue(state.is_valid())
-
-        # Add a 3 in the corner. This should be false since we can't have two
-        # connections with the starting or ending colors.
-        state.spaces[0][3] = 3
-        print_grid(False, state)
-        self.assertFalse(state.is_valid())
-
-        # Now make a grid of 3s around the starting 3 - This should be valid.
-        state.spaces[2][2] = 0
-        state.spaces[1][3] = 3
-        print_grid(True, state)
-        self.assertTrue(state.is_valid())
-
-        # Add an extra 3 so the 3s snake around a bit, this should still be valid.
-        state.spaces[2][2] = 0
-        state.spaces[1][3] = 3
-        state.spaces[2][2] = 3
-        print_grid(True, state)
-        self.assertTrue(state.is_valid())
-
-        # Make sure that the winning state is valid.
-        state.spaces[1,0] = 1
-        state.spaces[2,0] = 1
-        state.spaces[1,1] = 2
-        state.spaces[2,1] = 2
-        state.spaces[2,2] = 3
-        state.spaces[3,2] = 3
-        state.spaces[2,3] = 3
-        state.spaces[3,3] = 3
-        print_grid(True, state)
-        self.assertTrue(state.is_valid())
-
-
     # Test to make sure that we can transition states correctly.
     # This also tests breaking flows, when a flow for a particular
     # color overlaps another flow.
     def test_next_state_function(self):
-        return
         spaces = np.array([[ 1,  2,  3,  0],
                            [ 0,  0,  0,  0],
                            [ 0,  0,  0,  0],
@@ -240,8 +148,7 @@ class TestGridFunctions(unittest.TestCase):
             winning = winning + state.is_winning()
             if state.is_winning():
                 print(state.spaces)
-        print("Num states: ", len(all_states))
-        print("Num winning: ", winning)
+        self.assertTrue(winning, 2)
 
     #     return
 
