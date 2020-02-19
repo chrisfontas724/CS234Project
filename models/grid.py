@@ -101,7 +101,10 @@ class Grid:
         def __hash__(self):
             return hash((str(self.spaces.tolist()), str(self.tips)))
 
-        # Fill this out to use in the test down below.
+        # Checks to see if the provided action is allowed. Actions
+        # are allowed if they do not cause a flow to go out of bounds
+        # or if they do not result in a flow intersecting itself. Flows
+        # are allowed to intersect flows of different colors.
         def is_viable_action(self, action):
             # TODO: Fill this out
             tip = self.tips[action[0]]
@@ -228,8 +231,9 @@ class Grid:
             # We win!
             return True
 
-    # Generate all possibl states by iterating over all possible actions. For every
-    # state, we loop over all possbie
+    # Generate all possible states by iterating over all possible actions for every
+    # state, and then placing the newly generated state onto the stack so the process
+    # can be repeated until all states have been covered.
     def generate_all_states(self):
         result = list()
         seen = set()
@@ -245,8 +249,6 @@ class Grid:
                     stack.append(next_state)
                     seen.add(next_state)
         return result
-
-
 
     # Resets the grid to the starting state, before any moves have been made.
     # Declare dictionaries to store the starting and ending positions for the
