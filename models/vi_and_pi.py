@@ -22,6 +22,9 @@ def policy_evaluation(states, policy, gamma=0.9, tol=1e-3):
 
 		# Loop over all states
 		for state in states:
+			if not state in policy:
+				policy[state] = (1,0)
+
 			if state.is_viable_action(policy[state]):
 				next_state, reward = get_tuple(state, policy[state]) 
 
