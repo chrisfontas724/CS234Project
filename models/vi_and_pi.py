@@ -16,6 +16,7 @@ def get_tuple(state, action):
 
 def policy_evaluation(states, policy, gamma=0.9, tol=1e-3):
 
+
 	value_function = dict()
 	prev_v_f = value_function.copy()
 	while True:
@@ -108,7 +109,6 @@ def value_iteration(grid, gamma=0.9, tol=1e-3):
 
 		# Iterate over all the states.
 		for state in states:
-
 			if not state in new_values:
 				new_values[state] = 0.
 			old_value = new_values[state]
