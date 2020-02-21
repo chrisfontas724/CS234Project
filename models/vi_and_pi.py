@@ -15,7 +15,6 @@ def get_tuple(state, action):
 # methods for solving FlowFree. This is step 1 of our project.
 
 def policy_evaluation(states, policy, gamma=0.9, tol=1e-3):
-
 	value_function = dict()
 
 	while True:
@@ -23,9 +22,6 @@ def policy_evaluation(states, policy, gamma=0.9, tol=1e-3):
 
 		# Loop over all states
 		for state in states:
-			if not state in policy:
-				policy[state] = (1,0)
-
 			if state.is_viable_action(policy[state]):
 				next_state, reward = get_tuple(state, policy[state]) 
 
@@ -49,7 +45,6 @@ def policy_evaluation(states, policy, gamma=0.9, tol=1e-3):
 	return value_function
 
 def policy_improvement(states, value_from_policy, gamma=0.9):
-
 	new_policy = dict()
 
 	# Loop over all the states.
@@ -70,11 +65,8 @@ def policy_improvement(states, value_from_policy, gamma=0.9):
 	return new_policy
 
 def policy_iteration(grid,gamma=0.9, tol=10e-3):
-
 	states = grid.generate_all_states()
 	policy = dict()
-	#value_from_policy = dict()
-	#policy_new = dict()
 
 	value_function = dict()
 	policy = dict()
