@@ -33,8 +33,6 @@ def policy_evaluation(states, policy, gamma=0.9, tol=1e-3):
 				old_reward = 0 if not next_state in old_values else old_values[next_state]
 				total_value = (reward + gamma * old_reward)
 				value_function[state] = total_value
-		
-
 
 		max = 0
 		for key, values in value_function.items():
@@ -50,43 +48,9 @@ def policy_evaluation(states, policy, gamma=0.9, tol=1e-3):
 	############################
 	return value_function
 
-	# value_function = dict()
-	# prev_v_f = value_function.copy()
-	# while True:
-
-	# 	for state in states:
-	# 		v = 0
-	# 		if not state in policy:
-	# 			policy[state] = (1,0)
-
-	# 		tuple = get_tuple(state,policy[state])
-	# 		if tuple is not None:
-	# 			next_state, reward = tuple
-	# 			if not next_state in prev_v_f:
-	# 				prev_v_f[next_state]  = 0
-
-	# 			v +=  (reward + gamma * prev_v_f[next_state])
-	# 			value_function[state] = v
-	# 	max = 0
-	# 	for key, values in value_function.items():
-	# 		if key not in prev_v_f:
-	# 			prev_v_f[key] = 0
-	# 		tol_current = value_function[key]-prev_v_f[key]
-	# 		if tol_current>max:
-	# 			max = tol_current
-
-	# 	if tol_current < tol:
-	# 		break
-	# 	prev_v_f = value_function.copy()
-	# return value_function
-
-
 def policy_improvement(states, value_from_policy, gamma=0.9):
 
 	new_policy = dict()
-
-	############################
-	# YOUR IMPLEMENTATION HERE #
 
 	# Loop over all the states.
 	for state in states:
@@ -104,35 +68,6 @@ def policy_improvement(states, value_from_policy, gamma=0.9):
 
 	############################
 	return new_policy
-
-
-	# new_policy = dict()
-	# for state in states:
-
-	# 	possible_actions = state.possible_actions()
-	# 	Q_pi = dict()
-	# 	for action in possible_actions:
-	# 		Q_pi[action] = 0.
-
-	# 	for action in possible_actions:
-
-	# 		tuple = get_tuple(state, action)
-	# 		if tuple is not None:
-	# 			next_state, reward = tuple
-	# 			if next_state not in value_from_policy:
-	# 				value_from_policy[next_state] = 0
-	# 			Q_pi[action] +=  reward + gamma * value_from_policy[next_state]
-
-	# 	best_action = (1,0)
-	# 	best_val = 0
-	# 	for key, val in Q_pi.items():
-	# 		if val > best_val:
-	# 			best_action = key
-	# 			best_val = val
-	# 	new_policy[state] = best_action
-
-	# return new_policy
-
 
 def policy_iteration(grid,gamma=0.9, tol=10e-3):
 
@@ -168,7 +103,6 @@ def policy_iteration(grid,gamma=0.9, tol=10e-3):
 		value_function = new_values.copy()
 
 	return value_function, policy
-
 
 def value_iteration(grid, gamma=0.9, tol=1e-3):
 	states = grid.generate_all_states()
