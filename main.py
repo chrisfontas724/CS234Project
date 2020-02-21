@@ -31,7 +31,7 @@ def main():
 
     # Perform value iteration
     # vf, policy = value_iteration(grid)
-    policy = policy_iteration(grid)
+    value_function, policy = policy_iteration(grid)
     #print("Completed value iteration!")
     print("Completed policy iteration!")
 

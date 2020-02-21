@@ -84,15 +84,34 @@ def policy_iteration(grid,gamma=0.9, tol=10e-3):
 	policy = dict()
 	#value_from_policy = dict()
 	#policy_new = dict()
-	while True:
-		value_from_policy = policy_evaluation(states, policy, gamma, tol)
-		policy_new = policy_improvement(states, value_from_policy, gamma)
-		if policy==policy_new:
-			policy = policy_new
-			break
-		policy = policy_new.copy()
 
-	return policy
+	value_function = dict()
+	policy = dict()
+
+	while True:
+
+		new_policy = policy_improvement(states, value_function, gamma)
+
+		new_values = policy_evaluation(states, policy, gamma, tol)
+
+		# Find the maximum difference between old and new values.
+		policy_changed = 0.
+		for key,value in new_values.items():
+			if not key in value_function:
+				value_function[key] = 0.
+			change = np.abs(value - value_function[key])
+			if change > policy_changed:
+				policy_changed = change
+
+		# Break if policy below tolerance.
+		if policy_changed < tol:
+			break
+		
+		# Assign new policy
+		policy = new_policy.copy()
+		value_function = new_values.copy()
+
+	return value_function, policy
 
 
 def value_iteration(grid, gamma=0.9, tol=1e-3):
