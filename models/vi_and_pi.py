@@ -67,12 +67,12 @@ def policy_improvement(states, value_from_policy, gamma=0.9):
 	############################
 	return new_policy
 
-def policy_iteration(grid,gamma=0.9, tol=10e-3):
+def policy_iteration(grid, starting_value_function=dict(), gamma=0.9, tol=10e-3):
 	print("Begin policy iteration...")
 	states = grid.generate_all_states()
 	policy = dict()
 
-	value_function = dict()
+	value_function = starting_value_function
 	policy = dict()
 
 	while True:
@@ -100,12 +100,12 @@ def policy_iteration(grid,gamma=0.9, tol=10e-3):
 
 	return value_function, policy
 
-def value_iteration(grid, gamma=0.9, tol=1e-3):
+def value_iteration(grid, starting_value_function=dict(), gamma=0.9, tol=1e-3):
 	print("Begin value iteration...")
 	states = grid.generate_all_states()
 	nS = len(states)
 
-	value_function = dict()
+	value_function = starting_value_function
 	policy = dict()
 
 	while True:

@@ -4,18 +4,13 @@ from models.grid import Grid
 from models.vi_and_pi import value_iteration
 from renderer.renderer import GridRenderer
 from models.vi_and_pi import policy_iteration
+import pickle
 
 # Use the OptionParser library to get command line arguments
 # for us, such as the file we want to load in.
 def get_options():
     parser = OptionParser(usage="usage: %prog -l filename",
                           version="%prog 1.0")
-
-    parser.add_option("-l", "--level",
-                      action="store", # optional because action defaults to "store"
-                      dest="level",
-                      default="test_level.txt",
-                      help="FlowFree level to load",)
 
     # Determines if we should use policy iteration or value iteration for training.
     parser.add_option("-a", "--algorithm",
@@ -28,7 +23,7 @@ def get_options():
     parser.add_option("-m", "--mode",
                       action="store", # optional because action defaults to "store"
                       dest="mode",
-                      default="one_shot",
+                      default="train",
                       help="Pick a mode, train or test",)
 
     # File to load/save a run to.
@@ -39,20 +34,33 @@ def get_options():
 
     return parser.parse_args()
 
+# Training script.
 def main():
     # Grab the command line options.
     options, args = get_options()
 
-    # Instantiate the FLowFree grid.
-    grid = Grid(filename="levels/" + options.level)
-
-    # Initialize the renderer.
-    renderer = GridRenderer(options.level)
-
+    # Train by iterating over all grids in the training set, while using the
+    # previous iteration's value function as the starting point for the next
+    # iteration's training. The idea is that different boards of the same size
+    # would be able to share states and ths would thus allow us to generalize
+    # better to unseen boards.
     if options.mode == "train":
-      pass
+      algorithm = policy_iteration if options.algorithm == "policy_iteration" else value_iteration
+      value = dict()
+      policy = dict()
+      for i in range(1,3): 
+        grid = Grid(filename="levels/grid_" + str(i) + ".txt")
+        new_value, policy = algorithm(grid, value)
+        value = new_value.copy()
+
+      # Save the result of training to a pickle file.
+      with open("policies/" + options.file + ".pickle", 'wb') as handle:
+        pickle.dump(policy, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
     elif options.mode == "test":
-      pass
+      # Load up the pickle file we saved to during training.
+      with open("policies/" + options.file + ".pickle", 'rb') as handle:
+        b = pickle.load(handle)
 
 # Program entry point.
 if __name__ == "__main__":
