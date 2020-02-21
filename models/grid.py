@@ -69,6 +69,9 @@ class Grid:
                 # them to integers if they're valid numbers.
                 row = [int(numeric_string) for numeric_string in line.replace("\n", "").replace('\t', ' ').split(' ') if numeric_string is not ''] 
 
+                if len(row) == 0:
+                    continue
+
                 # Row length should match the size, otherwise the file format is wrong.
                 assert len(row) == self.size, \
                     "length is %r but should be %r" % (len(row), self.size)
