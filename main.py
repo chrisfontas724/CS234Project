@@ -3,6 +3,7 @@ from optparse import OptionParser
 from models.grid import Grid
 from models.vi_and_pi import value_iteration
 from renderer.renderer import GridRenderer
+from models.vi_and_pi import policy_iteration
 
 # Use the OptionParser library to get command line arguments
 # for us, such as the file we want to load in.
@@ -29,8 +30,11 @@ def main():
     renderer = GridRenderer(options.level)
 
     # Perform value iteration
-    vf, policy = value_iteration(grid)
-    print("Completed value iteration!")
+    # vf, policy = value_iteration(grid)
+    policy = policy_iteration(grid)
+    #print("Completed value iteration!")
+    print("Completed policy iteration!")
+
 
     # Now let's try out our policy!
     state = grid.start_state
