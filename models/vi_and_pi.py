@@ -12,9 +12,32 @@ def get_tuple(state, action):
 # Use this file to fill out policy iteration and value iteration
 # methods for solving FlowFree. This is step 1 of our project.
 
-def policy_evaluation(P, nS, nA, policy, gamma=0.9, tol=1e-3):
-    pass
+def policy_evaluation(states, policy, gamma=0.9, tol=1e-3):
+    value_function = dict()
 
+	while True:
+		old_values = value_function.copy()
+
+		# Loop over all states
+		for state in states:
+			tuple = state.next_state(policy[state])
+
+			# (probability, nextstate, reward, terminal)
+			total_value = 0.
+			(probability, next_state, reward, _) = tuple
+
+			if not next_state in old_values:
+				old_values[next_state] = 0.
+
+			value = probability * (reward + gamma * old_values[next_state])
+			total_value += value
+			value_function[state] = total_value
+		if np.allclose(old_values, value_function, tol, tol):
+			break
+
+
+	############################
+	return value_function
 
 def policy_improvement(P, nS, nA, value_from_policy, policy, gamma=0.9):
     pass
@@ -38,7 +61,6 @@ def value_iteration(grid, gamma=0.9, tol=1e-3):
 
 		# Iterate over all the states.
 		for state in states:
-
 			if not state in new_values:
 				new_values[state] = 0.
 			old_value = new_values[state]

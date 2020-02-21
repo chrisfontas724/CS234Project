@@ -193,6 +193,7 @@ class TestGridFunctions(unittest.TestCase):
     
                 # Break if we're in the winning state.
                 if state.is_winning():
+                    print("Won " + "grid_" + str(i) + "!")
                     num_wins = num_wins + 1
                     break
                 turns = turns + 1
