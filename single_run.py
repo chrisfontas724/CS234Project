@@ -16,10 +16,19 @@ def get_options():
                       dest="level",
                       default="test_level.txt",
                       help="FlowFree level to load",)
+
+    # Determines if we should use policy iteration or value iteration for training.
+    parser.add_option("-a", "--algorithm",
+                      action="store", # optional because action defaults to "store"
+                      dest="algorithm",
+                      default="policy_iteration",
+                      help="Pick an algorithm to use to train the policy",)
+
+
     return parser.parse_args()
 
+# Use to test a single level using either policy iteration or value iteration.
 def main():
-
     # Grab the command line options.
     options, args = get_options()
 
@@ -29,12 +38,10 @@ def main():
     # Initialize the renderer.
     renderer = GridRenderer(options.level)
 
-    # Perform value iteration
-    # vf, policy = value_iteration(grid)
-    value_function, policy = policy_iteration(grid)
-    #print("Completed value iteration!")
-    print("Completed policy iteration!")
+    print("Algorithm: ", options.algorithm)
 
+    value_function, policy = policy_iteration(grid) if options.algorithm == "policy_iteration" else value_iteration(grid)
+    print("Completed iteration!")
 
     # Now let's try out our policy!
     state = grid.start_state
