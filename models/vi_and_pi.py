@@ -16,66 +16,122 @@ def get_tuple(state, action):
 
 def policy_evaluation(states, policy, gamma=0.9, tol=1e-3):
 
-
 	value_function = dict()
-	prev_v_f = value_function.copy()
-	while True:
 
+	while True:
+		old_values = value_function.copy()
+
+		# Loop over all states
 		for state in states:
-			v = 0
 			if not state in policy:
 				policy[state] = (1,0)
 
-			tuple = get_tuple(state,policy[state])
-			if tuple is not None:
-				next_state, reward = tuple
-				if not next_state in prev_v_f:
-					prev_v_f[next_state]  = 0
+			if state.is_viable_action(policy[state]):
+				next_state, reward = get_tuple(state, policy[state]) 
 
-				v +=  (reward + gamma * prev_v_f[next_state])
-				value_function[state] = v
+				total_value = 0.
+				old_reward = 0 if not next_state in old_values else old_values[next_state]
+				total_value = (reward + gamma * old_reward)
+				value_function[state] = total_value
+		
+
+
 		max = 0
 		for key, values in value_function.items():
-			if key not in prev_v_f:
-				prev_v_f[key] = 0
-			tol_current = value_function[key]-prev_v_f[key]
+			if key not in old_values:
+				old_values[key] = 0
+			tol_current = value_function[key]-old_values[key]
 			if tol_current>max:
 				max = tol_current
 
-		if tol_current < tol:
+		if max < tol:
 			break
-		prev_v_f = value_function.copy()
+
+	############################
 	return value_function
+
+	# value_function = dict()
+	# prev_v_f = value_function.copy()
+	# while True:
+
+	# 	for state in states:
+	# 		v = 0
+	# 		if not state in policy:
+	# 			policy[state] = (1,0)
+
+	# 		tuple = get_tuple(state,policy[state])
+	# 		if tuple is not None:
+	# 			next_state, reward = tuple
+	# 			if not next_state in prev_v_f:
+	# 				prev_v_f[next_state]  = 0
+
+	# 			v +=  (reward + gamma * prev_v_f[next_state])
+	# 			value_function[state] = v
+	# 	max = 0
+	# 	for key, values in value_function.items():
+	# 		if key not in prev_v_f:
+	# 			prev_v_f[key] = 0
+	# 		tol_current = value_function[key]-prev_v_f[key]
+	# 		if tol_current>max:
+	# 			max = tol_current
+
+	# 	if tol_current < tol:
+	# 		break
+	# 	prev_v_f = value_function.copy()
+	# return value_function
 
 
 def policy_improvement(states, value_from_policy, gamma=0.9):
 
 	new_policy = dict()
+
+	############################
+	# YOUR IMPLEMENTATION HERE #
+
+	# Loop over all the states.
 	for state in states:
+		max_val = 0.0
 
-		possible_actions = state.possible_actions()
-		Q_pi = dict()
-		for action in possible_actions:
-			Q_pi[action] = 0.
+		# Get the action that maximizes the policy for the current state.
+		for action in state.possible_actions():
+			(next_state, reward) = get_tuple(state, action)
+			curr_val = reward
+			if next_state in value_from_policy:
+				curr_val += gamma * value_from_policy[next_state]
+			if curr_val >= max_val:
+				max_val = curr_val
+				new_policy[state] = action
 
-		for action in possible_actions:
+	############################
+	return new_policy
 
-			tuple = get_tuple(state, action)
-			if tuple is not None:
-				next_state, reward = tuple
-				if next_state not in value_from_policy:
-					value_from_policy[next_state] = 0
-				Q_pi[action] +=  reward + gamma * value_from_policy[next_state]
 
-		best_action = (1,0)
-		best_val = 0
-		for key, val in Q_pi.items():
-			if val > best_val:
-				best_action = key
-				best_val = val
-		new_policy[state] = best_action
+	# new_policy = dict()
+	# for state in states:
 
-		return new_policy
+	# 	possible_actions = state.possible_actions()
+	# 	Q_pi = dict()
+	# 	for action in possible_actions:
+	# 		Q_pi[action] = 0.
+
+	# 	for action in possible_actions:
+
+	# 		tuple = get_tuple(state, action)
+	# 		if tuple is not None:
+	# 			next_state, reward = tuple
+	# 			if next_state not in value_from_policy:
+	# 				value_from_policy[next_state] = 0
+	# 			Q_pi[action] +=  reward + gamma * value_from_policy[next_state]
+
+	# 	best_action = (1,0)
+	# 	best_val = 0
+	# 	for key, val in Q_pi.items():
+	# 		if val > best_val:
+	# 			best_action = key
+	# 			best_val = val
+	# 	new_policy[state] = best_action
+
+	# return new_policy
 
 
 def policy_iteration(grid,gamma=0.9, tol=10e-3):
@@ -92,7 +148,7 @@ def policy_iteration(grid,gamma=0.9, tol=10e-3):
 
 		new_policy = policy_improvement(states, value_function, gamma)
 
-		new_values = policy_evaluation(states, policy, gamma, tol)
+		new_values = policy_evaluation(states, new_policy, gamma, tol)
 
 		# Find the maximum difference between old and new values.
 		policy_changed = 0.
