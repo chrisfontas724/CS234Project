@@ -2,6 +2,7 @@ import numpy as np
 from optparse import OptionParser
 from models.grid import Grid
 import unittest
+from models.vi_and_pi import value_iteration
 
 class TestGridFunctions(unittest.TestCase):
 
@@ -175,6 +176,29 @@ class TestGridFunctions(unittest.TestCase):
             if state.is_winning():
                 print(state.spaces)
         self.assertTrue(winning, 1)
+
+    def test_all_4x4_grids(self):
+        num_wins = 0
+        for i in range(1, 16):
+            grid = Grid(filename="levels/grid_" + str(i) + ".txt")
+            vf, policy = value_iteration(grid)
+
+            state = grid.start_state
+
+            # We should expect each 4x4 grid to finish in less
+            # than 100 turns
+            turns = 0
+            while turns < 100:
+                state = state.next_state(policy[state])
+    
+                # Break if we're in the winning state.
+                if state.is_winning():
+                    num_wins = num_wins + 1
+                    break
+                turns = turns + 1
+        self.assertEqual(num_wins, 15)
+
+
 
 # Program entry point.
 if __name__ == "__main__":
