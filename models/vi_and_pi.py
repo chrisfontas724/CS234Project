@@ -1,7 +1,7 @@
 from models.grid import Grid
 import numpy as np
 
-# Return a tuple (probability, next_state, reward) for
+# Return a tuple (next_state, reward) for
 # a given state/action pair.
 def get_tuple(state, action):
 	if not state.is_viable_action(action):
@@ -131,12 +131,12 @@ def value_iteration(grid, gamma=0.9, tol=1e-3):
 				tuple = get_tuple(state, action)
 				new_value = 0.
 
-				# (probability, nextstate, reward)
-				(probability, next_state, reward) = tuple
+				# (nextstate, reward)
+				(next_state, reward) = tuple
 				if not next_state in value_function:
 					value_function[next_state] = 0.
 
-				new_value += probability * (reward + gamma * value_function[next_state])
+				new_value += (reward + gamma * value_function[next_state])
 
 				if new_value > max_value:
 					max_value = new_value
