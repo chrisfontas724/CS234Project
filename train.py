@@ -16,7 +16,7 @@ def get_options():
     parser.add_option("-a", "--algorithm",
                       action="store", # optional because action defaults to "store"
                       dest="algorithm",
-                      default="policy_iteration",
+                      default="value_iteration",
                       help="Pick an algorithm to use to train the policy",)
 
     # Deterimines if we should train, test, or one shot.
@@ -34,6 +34,16 @@ def get_options():
 
     return parser.parse_args()
 
+
+def play_game(grid, policy, max_turns=100):
+  counter = 0
+  state = grid.start_state
+  while counter < max_turns:
+    state = state.next_state(policy[state])
+    if state.is_winning():
+      return True
+  return False
+
 # Training script.
 def main():
     # Grab the command line options.
@@ -49,6 +59,7 @@ def main():
       value = dict()
       policy = dict()
       for i in range(1,16): 
+        print("Training iteration " + str(i))
         grid = Grid(filename="levels/grid_" + str(i) + ".txt")
         new_value, policy = algorithm(grid, value)
         value = new_value.copy()
@@ -57,10 +68,19 @@ def main():
       with open("policies/" + options.file + ".pickle", 'wb') as handle:
         pickle.dump(policy, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
+    # If we're in test mode, then we load up an existing policy, and have it play
+    # boards numbered 16-25. We count up how many of those 10 boards it wins.
     elif options.mode == "test":
       # Load up the pickle file we saved to during training.
       with open("policies/" + options.file + ".pickle", 'rb') as handle:
-        b = pickle.load(handle)
+        policy = pickle.load(handle)
+
+      num_wins = 0
+      for i in range(16, 26):
+        print("Playing game " + str(i))
+        grid = Grid(filename="levels/grid_" + str(i) + ".txt")
+        num_wins += play_game(grid, policy)
+      print("Testing won " + str(num_wins) + "out of 10 games!")
 
 # Program entry point.
 if __name__ == "__main__":
