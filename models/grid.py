@@ -115,7 +115,9 @@ class Grid:
         # or if they do not result in a flow intersecting itself. Flows
         # are allowed to intersect flows of different colors.
         def is_viable_action(self, action):
-            # TODO: Fill this out
+            if not action[0] in self.tips:
+              raise Exception("Action color " + str(action[0]) + " not found in tips...")
+
             tip = self.tips[action[0]]
             direction = action_map[action[1]]
             new_pos = (tip[0] + direction[0], tip[1] + direction[1])

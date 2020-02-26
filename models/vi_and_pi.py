@@ -118,7 +118,7 @@ def value_iteration(grid, starting_policy=dict(), starting_value_function=dict()
 			old_value = new_values[state]
 
 			max_value = float('-inf')
-			max_action = 0
+			max_action = (1,0)
 
 			# Iterate over all actions for this state.
 			possible_actions = state.possible_actions()

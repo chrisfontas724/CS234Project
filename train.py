@@ -5,6 +5,7 @@ from models.vi_and_pi import value_iteration
 from renderer.renderer import GridRenderer
 from models.vi_and_pi import policy_iteration
 import pickle
+import random
 
 # Use the OptionParser library to get command line arguments
 # for us, such as the file we want to load in.
@@ -39,7 +40,25 @@ def play_game(grid, policy, max_turns=100):
   counter = 0
   state = grid.start_state
   while counter < max_turns:
-    state = state.next_state(policy[state])
+    print("Tick!")
+    action = None
+    if not state in policy:
+      all_actions = state.possible_actions()
+      if len(all_actions) <= 0:
+        print("No possible actions")
+        return False
+      print("Random action")
+      action = random.choice(all_actions)
+    # Get the action directly from the policy
+    else:
+      print("Action from policy")
+      action = policy[state]
+
+    if action is None:
+      raise Exception("Action is none!")
+
+    print("ACTION: " + str(action))
+    state = state.next_state(action)
     if state.is_winning():
       return True
   return False
@@ -61,7 +80,7 @@ def main():
       for i in range(1,16): 
         print("Training iteration " + str(i))
         grid = Grid(filename="levels/grid_" + str(i) + ".txt")
-        new_value, policy = algorithm(grid, value)
+        new_value, policy = algorithm(grid, policy, value)
         value = new_value.copy()
 
       # Save the result of training to a pickle file.
@@ -75,8 +94,10 @@ def main():
       with open("policies/" + options.file + ".pickle", 'rb') as handle:
         policy = pickle.load(handle)
 
+      print("Num keys: ", len(policy.keys()))
+
       num_wins = 0
-      for i in range(16, 26):
+      for i in range(16, 25):
         print("Playing game " + str(i))
         grid = Grid(filename="levels/grid_" + str(i) + ".txt")
         num_wins += play_game(grid, policy)
