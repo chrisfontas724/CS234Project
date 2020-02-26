@@ -48,7 +48,7 @@ def main():
       algorithm = policy_iteration if options.algorithm == "policy_iteration" else value_iteration
       value = dict()
       policy = dict()
-      for i in range(1,3): 
+      for i in range(1,16): 
         grid = Grid(filename="levels/grid_" + str(i) + ".txt")
         new_value, policy = algorithm(grid, value)
         value = new_value.copy()
