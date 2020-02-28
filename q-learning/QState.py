@@ -30,15 +30,20 @@ class QState(Grid.State):
     # an action fails and we wind up in the same state twice, we should return
     # a very negative reward. All other states get a minor negative reward,
     # except for the winning state which gets a large positive reward.
+    #
+    # Lastly, we also return if we are done or not (based on whether or not
+    # we've reached a winning state). This is used by the Q-learning algorithm
+    # to determine if it should break or continue.
     def next_state(self, action):
 
     	# We need to penalize impossible actions very highly.
     	if not self.is_viable_action(action):
-    		return self.copy(), -1000000000
+    		return self.copy(), -1000000000, False
     	else:
     		state = super().next_state(action) if self.is_viable_action(action) else self.copy()
-    		reward = 100 if state.is_winning() else -1
-    		return state, reward
+    		won = state.is_winning()
+    		reward = 100 if won else -1
+    		return (state, reward, won)
 
 
 if __name__ == "__main__":
