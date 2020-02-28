@@ -15,6 +15,10 @@ class Config:
 class MLP(nn.Module):
     def __init__(self, config):
         super(Net, self).__init__()
+
+        # TODO: Remove this starter code and replace it with the actual
+        # model architecture that we want.
+        #
         # 1 input image channel, 6 output channels, 3x3 square convolution
         # kernel
         self.conv1 = nn.Conv2d(1, 6, 3)
