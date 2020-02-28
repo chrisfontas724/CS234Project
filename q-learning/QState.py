@@ -34,7 +34,7 @@ class QState(Grid.State):
     # Lastly, we also return if we are done or not (based on whether or not
     # we've reached a winning state). This is used by the Q-learning algorithm
     # to determine if it should break or continue.
-    def next_state(self, action):
+    def step(self, action):
 
     	# We need to penalize impossible actions very highly.
     	if not self.state.is_viable_action(action):
