@@ -21,6 +21,8 @@ class MLP(nn.Module):
         #
         # 1 input image channel, 6 output channels, 3x3 square convolution
         # kernel
+        self.relu = nn.ReLU()
+
         self.conv1 = nn.Conv2d(1, 6, 3)
         self.conv2 = nn.Conv2d(6, 16, 3)
         # an affine operation: y = Wx + b
