@@ -17,6 +17,10 @@ class MLPConfig:
 	self.nodes_per_layer = 5
 	self.num_actions = num_colors * 4
 
+
+# This MLP is used as the value function approximation (VFA) for
+# the Q function. The input is a feature representation of a state
+# and the output is a softmax over all possible actions.
 class MLP(nn.Module):
     def __init__(self, config):
         super(Net, self).__init__()
