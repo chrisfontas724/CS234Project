@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from models.grid import Grid
 import numpy as np
+import copy 
 
 class Config:
 	def __init__(self, board_size, num_colors):

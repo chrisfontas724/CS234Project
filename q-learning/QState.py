@@ -6,16 +6,16 @@ import numpy as np
 # added functionality to make it easier to use during Q Learning.
 class QState(Grid.State):
 	def __init__(self, state):
-        super(Grid.State, self).__init__()
+    	self.state = state
 
     # Return a feature vector for the given state to pass into. The
     # feature vector is a flat array consisting of the flattened
     # state of the board as well as the current flow tips appened
     # to the end.
     def get_feature_vector(self):
-    	flattened_spaces = self.spaces.flatten()
-    	for col in range(1, self.info.num_cols + 1):
-    		tip = self.tips[col];
+    	flattened_spaces = self.state.spaces.flatten()
+    	for col in range(1, self.state.info.num_cols + 1):
+    		tip = self.state.tips[col];
     		flattened_spaces.append(tip[0])
     		flattened_spaces.append(tip[1])
     	return flattened_spaces
@@ -37,13 +37,13 @@ class QState(Grid.State):
     def next_state(self, action):
 
     	# We need to penalize impossible actions very highly.
-    	if not self.is_viable_action(action):
-    		return self.copy(), -1000000000, False
+    	if not self.state.is_viable_action(action):
+    		return (self, -1000000000, False)
     	else:
-    		state = super().next_state(action) if self.is_viable_action(action) else self.copy()
+    		state = self.next_state(action)
     		won = state.is_winning()
     		reward = 100 if won else -1
-    		return (state, reward, won)
+    		return (QState(state), reward, won)
 
 
 if __name__ == "__main__":
