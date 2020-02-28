@@ -6,7 +6,10 @@ from models.grid import Grid
 import numpy as np
 import copy 
 
-class Config:
+# Config for the MLP. This is used to change the size of the MLP,
+# including the dimensions of its input and output layers, to
+# accommodate boards of different sizes.
+class MLPConfig:
 	def __init__(self, board_size, num_colors):
 	self.board_size = board_size
 	self.num_colors = num_colors
