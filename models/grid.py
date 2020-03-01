@@ -114,7 +114,7 @@ class Grid:
         # are allowed if they do not cause a flow to go out of bounds
         # or if they do not result in a flow intersecting itself. Flows
         # are allowed to intersect flows of different colors.
-        def is_viable_action(self, action, check_end_tips):
+        def is_viable_action(self, action, check_end_tips=True):
             if not action[0] in self.tips:
               raise Exception("Action color " + str(action[0]) + " not found in tips...")
 
