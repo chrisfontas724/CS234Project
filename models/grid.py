@@ -114,7 +114,7 @@ class Grid:
         # are allowed if they do not cause a flow to go out of bounds
         # or if they do not result in a flow intersecting itself. Flows
         # are allowed to intersect flows of different colors.
-        def is_viable_action(self, action):
+        def is_viable_action(self, action, check_end_tips):
             if not action[0] in self.tips:
               raise Exception("Action color " + str(action[0]) + " not found in tips...")
 
@@ -127,6 +127,12 @@ class Grid:
                new_pos[1] < 0 or new_pos[1] >= self.info.size:
                 return False
 
+            # If we're not checking end tips, we should make sure the space is
+            # empty (0).
+            if not check_end_tips:
+                if self.spaces[new_pos[0]][new_pos[1]] != 0:
+                    return False
+
             # Make sure the new position doesn't intersect a fixed
             # starting point.
             for _, value in self.info.color_start_coords.items():
@@ -135,21 +141,22 @@ class Grid:
 
             # Make sure the new position doesn't intersect a fixed
             # ending point, unless its the ending point of its color.
-            for key, value in self.info.color_end_coords.items():
-                if key != action[0] and new_pos == value:
-                    return False
+            if check_end_tips:
+                for key, value in self.info.color_end_coords.items():
+                    if key != action[0] and new_pos == value:
+                        return False
 
             # Make sure the new position doesn't already contain
             # the current flow *UNLESS* it's the end state, then
             # we can go into it (this is important for determining
             # if we are in the winning state or not).
             return (self.spaces[new_pos[0]][new_pos[1]] != action[0] or \
-                    new_pos == self.info.color_end_coords[action[0]])
+                    (check_end_tips and new_pos == self.info.color_end_coords[action[0]]))
 
         # Given an input state, return a list of possible actions that can be
         # taken from the provided state. At most, the number of moves is
         # (num_colors * num_directions).
-        def possible_actions(self):
+        def possible_actions(self, check_end_tips=True):
             # The list of all action tuples you can take from the
             # current board configuration.
             result = list()
@@ -160,7 +167,7 @@ class Grid:
                 for key, value in action_map.items():
                     test_action = (col, key)
 
-                    if self.is_viable_action(test_action):
+                    if self.is_viable_action(test_action, check_end_tips):
                         result.append(test_action)
 
             return result
@@ -173,11 +180,11 @@ class Grid:
         # are represented numerically, however, so (red, up) would be
         # (1,0) where "1" represents the color red and "0" represents
         # the direction up.
-        def next_state(self, action_tuple):
+        def next_state(self, action_tuple, check_end_tips=True):
 
             # Just do a basic check at the beginning to make sure we're not
             # passing a bad action.
-            if not self.is_viable_action(action_tuple):
+            if not self.is_viable_action(action_tuple, check_end_tips):
                 raise Exception('Action is not viable')
 
             # Get the color and direction from the action.
@@ -209,7 +216,7 @@ class Grid:
                             # if it is neither a start point nor an end point.
                             if item == existing_value and \
                                 self.info.color_start_coords[item] != (row, col) and \
-                                self.info.color_end_coords[item] != (row, col):
+                                (check_end_tips and self.info.color_end_coords[item] != (row, col)):
                                 result.spaces[row][col] = 0
                                 result.tips[existing_value] = result.info.color_start_coords[existing_value]
             # Call break flow.
@@ -241,7 +248,23 @@ class Grid:
                 for color in range(1, self.info.num_cols + 1):
                     if self.tips[color] != self.info.color_end_coords[color]:
                         return False
-        
+
+            # Make sure we have at least 2 of every color.
+            else:
+                counts = dict()
+                for x in range(self.info.size):
+                    for y in range(self.info.size):
+                        col = self.spaces[x][y]
+                        if col == 0:
+                            continue
+                        if col not in counts:
+                            counts[col] = 1
+                        else:
+                            counts[col] += 1
+                for color in range(1, self.info.num_cols + 1):
+                    if counts[color] < 2:
+                        return False
+
             # We win!
             return True
 
