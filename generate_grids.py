@@ -61,19 +61,22 @@ def generate_random_grid(size=4, num_colors=3):
    				break
 
 	if won:
+		state.set_to_start_with_current_tips()
 		return state
 	else:
-		return state
+		return None
 
 def main():
-	state = generate_random_grid(size=5, num_colors=4)
-	if state is None:
-		print("Failed =(")
-		return
+	states = set()
+	while len(states) < 1:
+		state = generate_random_grid(size=9, num_colors=7)
+		if state is not None:
+			states.add(state)
 
-	renderer = GridRenderer("Generated State")
-	renderer.render(state)
-	renderer.tear_down()
+	for state in states:
+		renderer = GridRenderer("Generated State")
+		renderer.render(state)
+		renderer.tear_down()
 
 
 if __name__ == "__main__":

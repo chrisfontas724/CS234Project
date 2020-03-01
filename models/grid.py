@@ -268,6 +268,15 @@ class Grid:
             # We win!
             return True
 
+        def set_to_start_with_current_tips(self):
+            self.info.color_end_coords = self.tips
+            for x in range(self.info.size):
+                for y in range(self.info.size):
+                    color = self.spaces[x][y]
+                    if self.info.color_start_coords[color] != (x,y) and \
+                    self.info.color_end_coords[color] != (x,y):
+                        self.spaces[x][y] = 0 
+
     # Generate all possible states by iterating over all possible actions for every
     # state, and then placing the newly generated state onto the stack so the process
     # can be repeated until all states have been covered.
