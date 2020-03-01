@@ -29,20 +29,15 @@ def random_start(size, num_colors):
 
 def generate_random_grid(size=4, num_colors=3):
 	spaces, start_coords = random_start(size, num_colors)
-
-	print("SPACES: ", spaces)
-	print("START: ", start_coords)
-
 	grid = Grid.create(spaces, num_colors, start_coords, end_coords=dict())   
 
 	state = grid.start_state
 	searching = True
 	won = False
-	while  searching:
+	while searching:
    		for col in range(1, num_colors+1):
 
    			possible_actions = state.possible_actions(check_end_tips=False)
-   			print("POSSIBLE ACTIONS: ", possible_actions)
    			if len(possible_actions) == 0:
    				searching = False
    				break
@@ -70,8 +65,10 @@ def generate_random_grid(size=4, num_colors=3):
 
 def write_states_to_disk(states, size):
 	dir_name = "levels/" + str(size) + "x" + str(size)
-	if not os.path.exists(os.path.dirname(dir_name)):
-	 	os.mkdir(dir_name)
+	try:
+		os.mkdir(dir_name)
+	except OSError as exc:
+		pass
 	counter = 1
 	for state in states:
 		filename = dir_name + "/" + "grid_" + str(counter) + ".txt"
@@ -84,23 +81,21 @@ def write_states_to_disk(states, size):
 		file.close()
 		counter += 1
 
-		
 
-
-def main():
-	size = 5
-	num_colors = 4
+def generate_batch(size, num_colors, total):
+	print("Starting batch: size=" + str(size) + ", colors=" + str(num_colors))
 	states = set()
-	while len(states) < 1:
+	while len(states) < total:
 		state = generate_random_grid(size=size, num_colors=num_colors)
 		if state is not None:
 			states.add(state)
 
 	write_states_to_disk(states, size)
-	for state in states:
-		renderer = GridRenderer("Generated State")
-		renderer.render(state)
-		renderer.tear_down()
+
+
+def main():
+	for i in range(5, 10):
+		generate_batch(i, i-1, 1000)
 
 
 if __name__ == "__main__":
