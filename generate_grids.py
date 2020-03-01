@@ -12,19 +12,25 @@ def filter_actions_by_color(actions, col):
 
 
 def random_start(size, num_colors):
-	pass
+	spaces = np.zeros((size, size))
+	start_coords = dict()
+	for color in range(1, num_colors + 1):
+		while True:
+			row = random.randint(0, size-1)
+			col = random.randint(0, size-1)
+			if spaces[row][col] == 0:
+				spaces[row][col] = color
+				start_coords[color] = (row, col)
+				break
+
+
+	return (spaces, start_coords)
 
 def generate_random_grid(size=4, num_colors=3):
+	spaces, start_coords = random_start(size, num_colors)
 
-	spaces = np.array([[ 1,  2,  3,  0],
-						[ 0,  0,  0,  0],
-                      	[ 0,  0,  0,  0],
-                       	[ 0,  0,  0,  0]])
-	start_coords = {
-			1:(0,0),
-			2:(0,1),
-			3:(0,2)
-	}
+	print("SPACES: ", spaces)
+	print("START: ", start_coords)
 
 	grid = Grid.create(spaces, num_colors, start_coords, end_coords=dict())   
 
@@ -57,10 +63,10 @@ def generate_random_grid(size=4, num_colors=3):
 	if won:
 		return state
 	else:
-		return None
+		return state
 
 def main():
-	state = generate_random_grid()
+	state = generate_random_grid(size=5, num_colors=4)
 	if state is None:
 		print("Failed =(")
 		return
