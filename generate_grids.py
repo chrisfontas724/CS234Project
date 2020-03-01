@@ -66,6 +66,10 @@ def generate_random_grid(size=4, num_colors=3):
 	else:
 		return None
 
+
+def write_states_to_disk(states):
+	pass
+
 def main():
 	states = set()
 	while len(states) < 1:
