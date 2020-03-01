@@ -226,17 +226,21 @@ class Grid:
         # Checks to see if the provided state is a winning state or not. To be
         # a winning state, all spaces must be covered and all starting and end
         # flows must be connected for every color.
-        def is_winning(self):
+        def is_winning(self, check_end_tips=True):
             # Make sure the are no 0s on the board.
             for x in range(self.info.size):
                 for y in range(self.info.size):
                     if self.spaces[x][y] == 0:
                         return False
 
-            # Finally, make sure all the flows have reached their end goal.
-            for color in range(1, self.info.num_cols + 1):
-                if self.tips[color] != self.info.color_end_coords[color]:
-                    return False
+            # In most cases, such as when running actual RL algorithms we want
+            # to check the tips, but for certain state-generation tasks we do
+            # not care about this.
+            if check_end_tips:
+                # Finally, make sure all the flows have reached their end goal.
+                for color in range(1, self.info.num_cols + 1):
+                    if self.tips[color] != self.info.color_end_coords[color]:
+                        return False
         
             # We win!
             return True
