@@ -2,6 +2,7 @@ from models.grid import Grid
 from renderer.renderer import GridRenderer
 import numpy as np
 import random
+import os
 
 def filter_actions_by_color(actions, col):
 	result = list()
@@ -67,16 +68,35 @@ def generate_random_grid(size=4, num_colors=3):
 		return None
 
 
-def write_states_to_disk(states):
-	pass
+def write_states_to_disk(states, size):
+	dir_name = "levels/" + str(size) + "x" + str(size)
+	if not os.path.exists(os.path.dirname(dir_name)):
+	 	os.mkdir(dir_name)
+	counter = 1
+	for state in states:
+		filename = dir_name + "/" + "grid_" + str(counter) + ".txt"
+		#os.mknod(filename)
+		file = open(filename, 'a')
+		file.truncate(0)
+		file.write(str(size) + " " + str(size) + "\n")
+		for i in range(size):
+			file.write( '    ' + '    '.join(map(str, state.spaces[i].astype(int))) + "\n")
+		file.close()
+		counter += 1
+
+		
+
 
 def main():
+	size = 5
+	num_colors = 4
 	states = set()
 	while len(states) < 1:
-		state = generate_random_grid(size=9, num_colors=7)
+		state = generate_random_grid(size=size, num_colors=num_colors)
 		if state is not None:
 			states.add(state)
 
+	write_states_to_disk(states, size)
 	for state in states:
 		renderer = GridRenderer("Generated State")
 		renderer.render(state)
