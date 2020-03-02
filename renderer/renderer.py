@@ -67,6 +67,6 @@ class GridRenderer:
 
     # Close the window being displayed.
     def tear_down(self):
-        cv2.waitKey(0)
+        cv2.waitKey(-1)
         cv2.destroyWindow(self.name)
 
