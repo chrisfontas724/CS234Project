@@ -94,7 +94,7 @@ def generate_batch(size, num_colors, total):
 
 
 def main():
-	for i in range(5, 10):
+	for i in range(4, 10):
 		generate_batch(i, i-1, 1000)
 
 
