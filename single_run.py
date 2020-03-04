@@ -4,6 +4,7 @@ from models.grid import Grid
 from models.vi_and_pi import value_iteration
 from renderer.renderer import GridRenderer
 from models.vi_and_pi import policy_iteration
+import copy
 
 # Use the OptionParser library to get command line arguments
 # for us, such as the file we want to load in.
