@@ -7,7 +7,7 @@ def get_tuple(state, action):
 	if not state.is_viable_action(action):
 		return None
 	next_state = state.next_state(action)
-	reward = 1 if next_state.is_winning() else 0
+	reward = 100 if next_state.is_winning() else 0
 	return (next_state, reward)
 
 
@@ -70,6 +70,8 @@ def policy_improvement(states, value_from_policy, gamma=0.9):
 def policy_iteration(grid, starting_policy=dict(), starting_value_function=dict(), gamma=0.9, tol=10e-3):
 	print("Begin policy iteration...")
 	states = grid.generate_all_states()
+	nS = len(states)
+	print("num states: ", nS)
 
 	value_function = starting_value_function
 	policy = starting_policy
@@ -89,6 +91,7 @@ def policy_iteration(grid, starting_policy=dict(), starting_value_function=dict(
 				policy_changed = change
 
 		# Break if policy below tolerance.
+		print("Pol delta: ", policy_changed)
 		if policy_changed < tol:
 			break
 		
@@ -102,6 +105,7 @@ def value_iteration(grid, starting_policy=dict(), starting_value_function=dict()
 	print("Begin value iteration...")
 	states = grid.generate_all_states()
 	nS = len(states)
+	print("num states: ", nS)
 
 	value_function = starting_value_function
 	policy = starting_policy
@@ -142,6 +146,7 @@ def value_iteration(grid, starting_policy=dict(), starting_value_function=dict()
 			delta = max(delta, max_value - old_value)
 
 		value_function = new_values
+		print("Delta: ", delta)
 		if delta < tol:
 			break
 
