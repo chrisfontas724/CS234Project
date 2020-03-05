@@ -25,7 +25,7 @@ def play(grid, mlp):
 
      	# Pass the features through the network to see
      	# what it gives as the best action to take.
-		action_probabilities = mlp(features)
+		action_probabilities = mlp(features.float())
 
      	# Grab the index of the best action.
 		_, index = action_probabilities.max(0)
@@ -49,6 +49,7 @@ def main():
     # Create the MLP network with the configuration.
     mlp_config = MLPConfig(grid.size, grid.num_cols)
     mlp = MLP(mlp_config)
+    mlp = mlp.float()
 
     criterion = nn.MSELoss()
     optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)

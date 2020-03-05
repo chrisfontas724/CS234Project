@@ -1,5 +1,6 @@
 from models.grid import Grid
 import numpy as np
+import torch
 
 
 # Extension of the state class used in dynamic programming that has
@@ -16,9 +17,9 @@ class QState(Grid.State):
         flattened_spaces = self.state.spaces.flatten()
         for col in range(1, self.state.info.num_cols + 1):
             tip = self.state.tips[col]
-            np.append(flattened_spaces, tip[0])
-            np.append(flattened_spaces, tip[1])
-        return flattened_spaces
+            flattened_spaces = np.append(flattened_spaces, tip[0])
+            flattened_spaces = np.append(flattened_spaces, tip[1])
+        return torch.tensor(flattened_spaces)
 
 
     def is_winning(self):
