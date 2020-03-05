@@ -10,12 +10,12 @@ import copy
 # including the dimensions of its input and output layers, to
 # accommodate boards of different sizes.
 class MLPConfig:
-	def __init__(self, board_size, num_colors):
-	self.board_size = board_size
-	self.num_colors = num_colors
-	self.num_hidden = 5
-	self.nodes_per_layer = 5
-	self.num_actions = num_colors * 4
+    def __init__(self, board_size, num_colors):
+        self.board_size = board_size
+        self.num_colors = num_colors
+        self.num_hidden = 5
+        self.nodes_per_layer = 5
+        self.num_actions = num_colors * 4
 
 
 # This MLP is used as the value function approximation (VFA) for
@@ -23,7 +23,7 @@ class MLPConfig:
 # and the output is a softmax over all possible actions.
 class MLP(nn.Module):
     def __init__(self, config):
-        super(Net, self).__init__()
+        super(MLP, self).__init__()
 
         self.config = config
         self.layers = []
@@ -34,7 +34,7 @@ class MLP(nn.Module):
         self.output = nn.Linear(input_size, config.num_actions)
 
         self.relu = nn.ReLU()
-    	self.sigmoid = nn.Sigmoid()
+        self.sigmoid = nn.Sigmoid()
         self.softmax = nn.Softmax(1)
 
     def forward(self, x):

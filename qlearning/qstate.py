@@ -5,8 +5,8 @@ import numpy as np
 # Extension of the state class used in dynamic programming that has
 # added functionality to make it easier to use during Q Learning.
 class QState(Grid.State):
-	def __init__(self, state):
-    	self.state = state
+    def __init__(self, state):
+        self.state = state
 
     # Return a feature vector for the given state to pass into. The
     # feature vector is a flat array consisting of the flattened
