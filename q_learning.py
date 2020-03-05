@@ -20,7 +20,6 @@ def train(grid, mlp, gamma=0.9):
 	train_steps = 100000
 	average_loss = 0.
 	for i in range(train_steps):
-
 		# Update the target nextwork to match the update network.
 		if i % update_target == 0:
 			target_mlp = MLP(mlp.config)
@@ -45,14 +44,15 @@ def train(grid, mlp, gamma=0.9):
 
 		# Take that action and see what happens next.
 		new_state, reward, terminal = state.step(action)
-		# if terminal:
-		# 	state = QState(grid.start_state)
-		# 	continue
 
-		# Use e-greedy algorithm to get q(s',a'; w-)
-		new_features = new_state.get_feature_vector()
-		new_action, q_prime_sa = target_mlp.get_next_action(new_features.float())
-
+		# Use e-greedy algorithm to get q(s',a'; w-). If we're
+		# in the terminal/winning state, then there is no next
+		# state, and so q_prime_sa is just 0.
+		if terminal:
+			q_prime_sa = torch.tensor(0.)
+		else:
+			new_features = new_state.get_feature_vector()
+			_, q_prime_sa = target_mlp.get_next_action(new_features.float())
 
 		# Calculate loss.
 		loss = loss_function(reward + gamma*q_prime_sa, q_sa)
@@ -64,8 +64,8 @@ def train(grid, mlp, gamma=0.9):
 
 		average_loss += loss.item()
 
-		# Update the current state.
-		state = new_state
+		# Update the current state. If we won, go back to the beginning.
+		state = new_state if not terminal else QState(grid.start_state)
 		
 		if i % 1000 == 0:
 			print("Iteration " + str(i) + " average loss: " + str(average_loss / 1000))
