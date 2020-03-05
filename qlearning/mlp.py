@@ -18,7 +18,7 @@ class MLPConfig:
         self.num_hidden = num_hidden
         self.nodes_per_layer = 7
         self.num_actions = num_colors * 4
-        self.exploration_rate = 0.25
+        self.exploration_rate = 0.1
 
 
 # This MLP is used as the value function approximation (VFA) for
@@ -50,19 +50,26 @@ class MLP(nn.Module):
     def get_Q(self, state):
         return self(state.float())
 
-    def get_next_action(self, state):
+    def get_next_action(self, state, grad):
         if random.random() > self.config.exploration_rate: # Explore (gamble) or exploit (greedy)
-            return self.greedy_action(state)
+            return self.greedy_action(state, grad)
         else:
-            return self.random_action(state)
+            return self.random_action(state, grad)
 
-    def greedy_action(self, state):
+    def greedy_action(self, state, grad):
+        if grad:
+            value, index_tensor = self.get_Q(state).max(0)
+            index = index_tensor.item()
+            return self.convert_index_to_tuple(index), value
         with torch.no_grad():
             value, index_tensor = self.get_Q(state).max(0)
             index = index_tensor.item()
             return self.convert_index_to_tuple(index), value
 
-    def random_action(self, state):
+    def random_action(self, state, grad):
+        if grad:
+            index = random.randrange(0, self.config.num_actions)
+            return self.convert_index_to_tuple(index), self.get_Q(state)[index]   
         with torch.no_grad():
             index = random.randrange(0, self.config.num_actions)
             return self.convert_index_to_tuple(index), self.get_Q(state)[index]

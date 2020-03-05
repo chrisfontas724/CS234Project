@@ -42,27 +42,20 @@ def train(size, gamma=0.9):
 		# Get the q values for the state from the update network.
 		old_state_q_values = mlp(features.float())
 
-		# Choose a random action for q(s,a; w)
-		possible_actions = state.state.possible_actions()
-		if len(possible_actions) == 0:
-			state = QState(grid.start_state)
-			continue
-
-		action = random.choice(possible_actions)
-		index = (action[0] - 1)*4 + action[1]
-		q_sa = old_state_q_values[index]
+		# Use e-greedy to get the next action.
+		action, q_sa = mlp.get_next_action(features, grad=True)
 
 		# Take that action and see what happens next.
 		new_state, reward, terminal = state.step(action)
 
-		# Use e-greedy algorithm to get q(s',a'; w-). If we're
+		# Get the maximum action for q(s',a'; w-). If we're
 		# in the terminal/winning state, then there is no next
 		# state, and so q_prime_sa is just 0.
 		if terminal:
 			q_prime_sa = torch.tensor(0.)
 		else:
 			new_features = new_state.get_feature_vector()
-			_, q_prime_sa = target_mlp.get_next_action(new_features.float())
+			_, q_prime_sa = target_mlp.greedy_action(new_features.float(), grad=False)
 
 		# Calculate loss.
 		loss = loss_function(reward + gamma*q_prime_sa, q_sa)
