@@ -8,6 +8,7 @@ import torch.nn as nn
 from renderer.renderer import GridRenderer
 import copy
 import torch.nn.functional as F
+import random
 
 def train(grid, mlp, gamma=0.9):
 
@@ -27,15 +28,16 @@ def train(grid, mlp, gamma=0.9):
 		# Get the q values for the state from the update network.
 		old_state_q_values = mlp(features.float())
 
-		# Choose an action with e-greedy algorithm.
-		action, action_value= mlp.get_next_action(features)
+		# Choose a random action for q(s,a; w)
+		index = random.randrange(1, mlp.config.num_actions)
+		action = mlp.convert_index_to_tuple(index)
+		action_value = old_state_q_values[index]
+
 
 		# Take that action and see what happens next.
 		new_state, reward, terminal = state.step(action)
-		if terminal:
-			print("Win state!!!!")
 
-		# Get the feature vectors for the new state, and get the q_values
+		# Use e-greedy algorithm to get q(s',a'; w-)
 		new_features = new_state.get_feature_vector()
 		new_action, new_action_value = target_mlp.get_next_action(new_features.float())
 

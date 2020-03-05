@@ -57,15 +57,15 @@ class MLP(nn.Module):
             return self.random_action(state)
 
     def greedy_action(self, state):
-        #with torch.no_grad():
-        value, index_tensor = self.get_Q(state).max(0)
-        index = index_tensor.item()
-        return self.convert_index_to_tuple(index), value
+        with torch.no_grad():
+            value, index_tensor = self.get_Q(state).max(0)
+            index = index_tensor.item()
+            return self.convert_index_to_tuple(index), value
 
     def random_action(self, state):
-        #with torch.no_grad():
-        index = random.randrange(0, self.config.num_actions)
-        return self.convert_index_to_tuple(index), self.get_Q(state)[index]
+        with torch.no_grad():
+            index = random.randrange(0, self.config.num_actions)
+            return self.convert_index_to_tuple(index), self.get_Q(state)[index]
 
     def convert_index_to_tuple(self, index):
         color = int(index / 4 + 1)
