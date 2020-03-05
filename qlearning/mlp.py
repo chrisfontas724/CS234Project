@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from models.grid import Grid
 import numpy as np
 import copy 
+import random
 
 # Config for the MLP. This is used to change the size of the MLP,
 # including the dimensions of its input and output layers, to
@@ -17,6 +18,7 @@ class MLPConfig:
         self.num_hidden = 5
         self.nodes_per_layer = 5
         self.num_actions = num_colors * 4
+        self.exploration_rate = 0.1
 
 
 # This MLP is used as the value function approximation (VFA) for
@@ -45,3 +47,26 @@ class MLP(nn.Module):
         x = self.output(x)
         x = self.softmax(x)
         return x
+
+    def get_Q(self, state):
+        return self(state.float())
+
+    def get_next_action(self, state):
+        if random.random() > self.config.exploration_rate: # Explore (gamble) or exploit (greedy)
+            return self.greedy_action(state)
+        else:
+            return self.random_action()
+
+    def greedy_action(self, state):
+        _, index_tensor = self.get_Q(state).max(0)
+        index = index_tensor.item()
+        return self.convert_index_to_tuple(index), index
+
+    def random_action(self):
+        index = random.randrange(0, self.config.num_actions)
+        return self.convert_index_to_tuple(index), index
+
+    def convert_index_to_tuple(self, index):
+        color = int(index / 4 + 1)
+        direction = int(index % 4)
+        return (color, direction)

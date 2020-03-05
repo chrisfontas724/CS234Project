@@ -54,7 +54,7 @@ class QState(Grid.State):
     		state = self.next_state(action)
     		won = state.is_winning()
     		reward = 100 if won else -1
-    		return (QState(state), reward, won)
+    		return (state, reward, won)
 
 
 if __name__ == "__main__":

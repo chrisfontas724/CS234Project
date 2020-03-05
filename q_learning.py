@@ -11,8 +11,29 @@ def train(grid, mlp, loss_function, optimizer):
 
 	state = QState(grid.start_state)
 
-	state, reward, terminal = state.step((1,0))
-	print("Train: ", reward, terminal)
+	train_steps = 1000
+	for _ in range(train_steps):
+		features = state.get_feature_vector()
+
+		old_state_q_values = mlp(features.float())
+
+		action, index = mlp.get_next_action(features)
+
+		new_state, reward, terminal = state.step(action)
+		print("Result tuple: ", reward, terminal)
+
+		new_features = new_state.get_feature_vector()
+
+		new_state_q_values = mlp(new_features.float())
+		_, new_index = new_state_q_values.max(0)
+
+		loss = loss_function(reward + new_state_q_values[new_index], old_state_q_values[index])
+		print("LOSS: ", loss)
+		print("\n")
+
+		loss.backward()
+		optimizer.step()
+
 
 
 def play(grid, mlp):
