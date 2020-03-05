@@ -10,14 +10,24 @@ import copy
 import torch.nn.functional as F
 import random
 
-def train(grid, mlp, gamma=0.9):
-	optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
+def train(size, gamma=0.9):
+
+	grid_idx = 1
+    # Hardcode a simple grid for now.
+	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + str(grid_idx) + ".txt")
+
+	# Create the MLP network with the configuration.
+	mlp_config = MLPConfig(grid.size, grid.num_cols, 30)
+	mlp = MLP(mlp_config)
+	mlp = mlp.float()
+
+	optimizer = torch.optim.Adam(mlp.parameters(), lr=1e-4, weight_decay=1e-5)
 	loss_function = torch.nn.MSELoss()
 	state = QState(grid.start_state)
 
 	target_mlp = None
 	update_target = 10000
-	train_steps = 100000
+	train_steps = 10000000
 	average_loss = 0.
 	for i in range(train_steps):
 		# Update the target nextwork to match the update network.
@@ -65,7 +75,16 @@ def train(grid, mlp, gamma=0.9):
 		average_loss += loss.item()
 
 		# Update the current state. If we won, go back to the beginning.
-		state = new_state if not terminal else QState(grid.start_state)
+		if not terminal:
+			state = new_state
+		# Start a new grid.
+		else:
+			print("Load new grid!")
+			grid_idx += 1
+			if grid_idx >= 900:
+				grid_idx = 1
+			grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + str(grid_idx) + ".txt")
+			state = QState(grid.start_state)
 		
 		if i % 1000 == 0:
 			print("Iteration " + str(i) + " average loss: " + str(average_loss / 1000))
@@ -74,8 +93,8 @@ def train(grid, mlp, gamma=0.9):
 	return mlp
 
 
-def play(grid, mlp):
-
+def play(mlp):
+	grid = Grid(filename="levels/grid_1.txt")
 	renderer = GridRenderer("Q-Learning")
 
 	# Wrap the states as QStates to get functionality
@@ -107,17 +126,10 @@ def play(grid, mlp):
 	return won
 
 def main():
-    # Hardcode a simple grid for now.
-	grid = Grid(filename="levels/grid_1.txt")
+	mlp = train(4)
+	torch.save(mlp.state_dict(), "q_models/model.txt")
 
-	# Create the MLP network with the configuration.
-	mlp_config = MLPConfig(grid.size, grid.num_cols, 15)
-	mlp = MLP(mlp_config)
-	mlp = mlp.float()
-
-	mlp = train(grid, mlp)
-
-	status = play(grid, mlp)
+	status = play(mlp)
 	print("We " + ("won \\^_^/" if status else "lost =("))
 
 if __name__ == "__main__":
