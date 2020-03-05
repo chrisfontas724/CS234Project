@@ -21,7 +21,7 @@ def train(size, gamma=0.9):
 	mlp = MLP(mlp_config)
 	mlp = mlp.float()
 
-	optimizer = torch.optim.Adam(mlp.parameters(), lr=1e-4, weight_decay=1e-5)
+	optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
 	loss_function = torch.nn.MSELoss()
 	state = QState(grid.start_state)
 
