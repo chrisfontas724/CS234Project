@@ -11,16 +11,21 @@ import torch.nn.functional as F
 import random
 
 def train(grid, mlp, gamma=0.9):
-
-	target_mlp = copy.deepcopy(mlp)
 	optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
-
 	state = QState(grid.start_state)
 
-	update_target = 2000
-	train_steps = 100000
+	target_mlp = None
+	update_target = 10000
+	train_steps = 100000000
 	average_loss = 0.
 	for i in range(train_steps):
+
+		# Update the target nextwork to match the update network.
+		if i % update_target == 0:
+			target_mlp = MLP(mlp.config)
+			target_mlp.load_state_dict(copy.deepcopy(mlp.state_dict()))
+			target_mlp.train(False)
+
 
 		# Grab the feature vectors for the current state.
 		features = state.get_feature_vector()
@@ -42,6 +47,7 @@ def train(grid, mlp, gamma=0.9):
 		new_action, new_action_value = target_mlp.get_next_action(new_features.float())
 
 
+		# Calculate loss.
 		target_value = reward + gamma*new_action_value.item()
 		loss = F.smooth_l1_loss(torch.tensor(target_value), action_value)
 
@@ -54,11 +60,9 @@ def train(grid, mlp, gamma=0.9):
 
 		# Update the current state.
 		state = new_state
-
-		# Update the target nextwork to match the update network.
-		if i % update_target == 0:
-			target_mlp = copy.deepcopy(mlp)
-			print("Iteration " + str(i) + " average loss: " + str(average_loss / update_target))
+		
+		if i % 1000 == 0:
+			print("Iteration " + str(i) + " average loss: " + str(average_loss / 1000))
 			average_loss = 0.0
 
 	return mlp
