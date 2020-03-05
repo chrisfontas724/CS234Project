@@ -54,7 +54,7 @@ class MLP(nn.Module):
         if random.random() > self.config.exploration_rate: # Explore (gamble) or exploit (greedy)
             return self.greedy_action(state)
         else:
-            return self.random_action(state, False)
+            return self.random_action(state)
 
     def greedy_action(self, state):
         with torch.no_grad():
@@ -62,10 +62,7 @@ class MLP(nn.Module):
             index = index_tensor.item()
             return self.convert_index_to_tuple(index), value
 
-    def random_action(self, state, grad=True):
-        if grad:
-            index = random.randrange(0, self.config.num_actions)
-            return self.convert_index_to_tuple(index), self.get_Q(state)[index]
+    def random_action(self, state):
         with torch.no_grad():
             index = random.randrange(0, self.config.num_actions)
             return self.convert_index_to_tuple(index), self.get_Q(state)[index]

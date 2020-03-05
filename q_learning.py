@@ -17,7 +17,7 @@ def train(grid, mlp, gamma=0.9):
 
 	target_mlp = None
 	update_target = 10000
-	train_steps = 100000000
+	train_steps = 100000
 	average_loss = 0.
 	for i in range(train_steps):
 
@@ -27,7 +27,6 @@ def train(grid, mlp, gamma=0.9):
 			target_mlp.load_state_dict(copy.deepcopy(mlp.state_dict()))
 			target_mlp.train(False)
 
-
 		# Grab the feature vectors for the current state.
 		features = state.get_feature_vector()
 
@@ -35,20 +34,28 @@ def train(grid, mlp, gamma=0.9):
 		old_state_q_values = mlp(features.float())
 
 		# Choose a random action for q(s,a; w)
-		action, action_value = mlp.random_action(features)
+		possible_actions = state.state.possible_actions()
+		if len(possible_actions) == 0:
+			state = QState(grid.start_state)
+			continue
 
+		action = random.choice(possible_actions)
+		index = (action[0] - 1)*4 + action[1]
+		q_sa = old_state_q_values[index]
 
 		# Take that action and see what happens next.
 		new_state, reward, terminal = state.step(action)
+		# if terminal:
+		# 	state = QState(grid.start_state)
+		# 	continue
 
 		# Use e-greedy algorithm to get q(s',a'; w-)
 		new_features = new_state.get_feature_vector()
-		new_action, new_action_value = target_mlp.get_next_action(new_features.float())
+		new_action, q_prime_sa = target_mlp.get_next_action(new_features.float())
 
 
 		# Calculate loss.
-		target_value = reward + gamma*new_action_value
-		loss = loss_function(target_value, action_value)
+		loss = loss_function(reward + gamma*q_prime_sa, q_sa)
 
        	# zero the parameter gradients
 		optimizer.zero_grad()
@@ -79,20 +86,8 @@ def play(grid, mlp):
     	# Grab the feature vector for the given QState.
 		features = state.get_feature_vector()
 
-     	# Pass the features through the network to see
-     	# what it gives as the best action to take.
-		action_probabilities = mlp(features.float())
-
-     	# Grab the index of the best action.
-		_, index_tensor = action_probabilities.max(0)
-		index = index_tensor.item()
-		print("Index: ", index)
-
-     	# Figure out what that corresponds too.
-		color = int(index / 4 + 1)
-		direction = int(index % 4)
-
-		action = (color, direction)
+		# Get best action from the MLP.
+		action, _ = mlp.greedy_action(features.float())
 		print("Take action: ", action)
 
 		if not state.is_viable_action(action):
@@ -100,7 +95,6 @@ def play(grid, mlp):
 
      	# Advance to the next state.
 		state = state.next_state(action)
-
 
 		# Break if we're in the winning state.
 		if state.is_winning():
@@ -117,7 +111,7 @@ def main():
 	grid = Grid(filename="levels/grid_1.txt")
 
 	# Create the MLP network with the configuration.
-	mlp_config = MLPConfig(grid.size, grid.num_cols, 50)
+	mlp_config = MLPConfig(grid.size, grid.num_cols, 15)
 	mlp = MLP(mlp_config)
 	mlp = mlp.float()
 
