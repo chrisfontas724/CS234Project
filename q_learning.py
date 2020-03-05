@@ -12,6 +12,7 @@ import random
 
 def train(grid, mlp, gamma=0.9):
 	optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
+	loss_function = torch.nn.MSELoss()
 	state = QState(grid.start_state)
 
 	target_mlp = None
@@ -34,9 +35,7 @@ def train(grid, mlp, gamma=0.9):
 		old_state_q_values = mlp(features.float())
 
 		# Choose a random action for q(s,a; w)
-		index = random.randrange(1, mlp.config.num_actions)
-		action = mlp.convert_index_to_tuple(index)
-		action_value = old_state_q_values[index]
+		action, action_value = mlp.random_action(features)
 
 
 		# Take that action and see what happens next.
@@ -48,8 +47,8 @@ def train(grid, mlp, gamma=0.9):
 
 
 		# Calculate loss.
-		target_value = reward + gamma*new_action_value.item()
-		loss = F.smooth_l1_loss(torch.tensor(target_value), action_value)
+		target_value = reward + gamma*new_action_value
+		loss = loss_function(target_value, action_value)
 
        	# zero the parameter gradients
 		optimizer.zero_grad()
@@ -118,7 +117,7 @@ def main():
 	grid = Grid(filename="levels/grid_1.txt")
 
 	# Create the MLP network with the configuration.
-	mlp_config = MLPConfig(grid.size, grid.num_cols, 20)
+	mlp_config = MLPConfig(grid.size, grid.num_cols, 50)
 	mlp = MLP(mlp_config)
 	mlp = mlp.float()
 
