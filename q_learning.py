@@ -11,8 +11,9 @@ def train(grid, mlp, loss_function, optimizer):
 
 	state = QState(grid.start_state)
 
+	state, reward, terminal = state.step((1,0))
+	print("Train: ", reward, terminal)
 
-	pass
 
 def play(grid, mlp):
 
@@ -51,18 +52,19 @@ def play(grid, mlp):
 
 def main():
     # Hardcode a simple grid for now.
-    grid = Grid(filename="levels/grid_1.txt")
+	grid = Grid(filename="levels/grid_1.txt")
 
-    # Create the MLP network with the configuration.
-    mlp_config = MLPConfig(grid.size, grid.num_cols)
-    mlp = MLP(mlp_config)
-    mlp = mlp.float()
+	# Create the MLP network with the configuration.
+	mlp_config = MLPConfig(grid.size, grid.num_cols)
+	mlp = MLP(mlp_config)
+	mlp = mlp.float()
 
-#    criterion = nn.MSELoss()
-#    optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
+	criterion = nn.MSELoss()
+	optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
+	train(grid, mlp, criterion, optimizer)
 
-    status = play(grid, mlp)
-    print("We " + ("won \\^_^/" if status else "lost =("))
+	status = play(grid, mlp)
+	print("We " + ("won \\^_^/" if status else "lost =("))
 
 if __name__ == "__main__":
 	main()
