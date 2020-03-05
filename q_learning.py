@@ -6,41 +6,58 @@ import torch.optim as optim
 import torch
 import torch.nn as nn
 from renderer.renderer import GridRenderer
+import copy
+import torch.nn.functional as F
 
+def train(grid, mlp, gamma=0.9):
 
-def train(grid, mlp):
-	loss_function = nn.MSELoss()
+	target_mlp = copy.deepcopy(mlp)
 	optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
 
 	state = QState(grid.start_state)
 
+	update_target = 2000
 	train_steps = 100000
-	for _ in range(train_steps):
+	average_loss = 0.
+	for i in range(train_steps):
+
+		# Grab the feature vectors for the current state.
 		features = state.get_feature_vector()
 
+		# Get the q values for the state from the update network.
 		old_state_q_values = mlp(features.float())
 
-		action, index = mlp.get_next_action(features)
+		# Choose an action with e-greedy algorithm.
+		action, action_value= mlp.get_next_action(features)
 
+		# Take that action and see what happens next.
 		new_state, reward, terminal = state.step(action)
-		print("Result tuple: ", reward, terminal)
+		if terminal:
+			print("Win state!!!!")
 
+		# Get the feature vectors for the new state, and get the q_values
 		new_features = new_state.get_feature_vector()
+		new_action, new_action_value = target_mlp.get_next_action(new_features.float())
 
-		new_state_q_values = mlp(new_features.float())
-		_, new_index = new_state_q_values.max(0)
 
-		#print("Q Values: " + str(new_state_q_values[new_index]) + " " + str(old_state_q_values[index]))
+		target_value = reward + gamma*new_action_value.item()
+		loss = F.smooth_l1_loss(torch.tensor(target_value), action_value)
 
-		loss = loss_function(reward + new_state_q_values[new_index], old_state_q_values[index])
-		print("LOSS: ", loss.item())
-		print("\n")
-
+       	# zero the parameter gradients
+		optimizer.zero_grad()
 		loss.backward()
 		optimizer.step()
 
-		# for param in mlp.parameters():
-  # 			print(param.data)
+		average_loss += loss.item()
+
+		# Update the current state.
+		state = new_state
+
+		# Update the target nextwork to match the update network.
+		if i % update_target == 0:
+			target_mlp = copy.deepcopy(mlp)
+			print("Iteration " + str(i) + " average loss: " + str(average_loss / update_target))
+			average_loss = 0.0
 
 	return mlp
 

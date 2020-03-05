@@ -49,7 +49,7 @@ class QState(Grid.State):
 
     	# We need to penalize impossible actions very highly.
     	if not self.state.is_viable_action(action):
-    		return (self, -1000000000, False)
+    		return (self, -100, False)
     	else:
     		state = self.next_state(action)
     		won = state.is_winning()

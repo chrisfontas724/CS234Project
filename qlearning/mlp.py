@@ -16,7 +16,7 @@ class MLPConfig:
         self.board_size = board_size
         self.num_colors = num_colors
         self.num_hidden = num_hidden
-        self.nodes_per_layer = 5
+        self.nodes_per_layer = 7
         self.num_actions = num_colors * 4
         self.exploration_rate = 0.1
 
@@ -37,13 +37,12 @@ class MLP(nn.Module):
         self.output = nn.Linear(input_size, config.num_actions)
 
         self.relu = nn.ReLU()
-        self.sigmoid = nn.Sigmoid()
         self.softmax = nn.Softmax(dim=0)
 
     def forward(self, x):
         for h in range(self.config.num_hidden):
             x = self.layers[h](x)
-            x = self.sigmoid(x)
+            x = self.relu(x)
         x = self.output(x)
         x = self.softmax(x)
         return x
@@ -55,16 +54,18 @@ class MLP(nn.Module):
         if random.random() > self.config.exploration_rate: # Explore (gamble) or exploit (greedy)
             return self.greedy_action(state)
         else:
-            return self.random_action()
+            return self.random_action(state)
 
     def greedy_action(self, state):
-        _, index_tensor = self.get_Q(state).max(0)
+        #with torch.no_grad():
+        value, index_tensor = self.get_Q(state).max(0)
         index = index_tensor.item()
-        return self.convert_index_to_tuple(index), index
+        return self.convert_index_to_tuple(index), value
 
-    def random_action(self):
+    def random_action(self, state):
+        #with torch.no_grad():
         index = random.randrange(0, self.config.num_actions)
-        return self.convert_index_to_tuple(index), index
+        return self.convert_index_to_tuple(index), self.get_Q(state)[index]
 
     def convert_index_to_tuple(self, index):
         color = int(index / 4 + 1)
