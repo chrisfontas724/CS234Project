@@ -28,21 +28,28 @@ def play(grid, mlp):
 		action_probabilities = mlp(features.float())
 
      	# Grab the index of the best action.
-		_, index = action_probabilities.max(0)
+		_, index_tensor = action_probabilities.max(0)
+		index = index_tensor.item()
+		print("Index: ", index)
 
      	# Figure out what that corresponds too.
-		color = index / grid.num_cols + 1
-		direction = index % 4
+		color = int(index / 4 + 1)
+		direction = int(index % 4)
+
+		action = (color, direction)
+		print("Take action: ", action)
+
+		if not state.is_viable_action(action):
+			return False
 
      	# Advance to the next state.
-		state = state.next_state((color, direction))
+		state = state.next_state(action)
      
 		# Break if we're in the winning state.
 		if state.is_winning():
 			return True
 
 def main():
-
     # Hardcode a simple grid for now.
     grid = Grid(filename="levels/grid_1.txt")
 
@@ -51,10 +58,11 @@ def main():
     mlp = MLP(mlp_config)
     mlp = mlp.float()
 
-    criterion = nn.MSELoss()
-    optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
+#    criterion = nn.MSELoss()
+#    optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
 
-    play(grid, mlp)
+    status = play(grid, mlp)
+    print("We " + ("won \\^_^/" if status else "lost =("))
 
 if __name__ == "__main__":
 	main()

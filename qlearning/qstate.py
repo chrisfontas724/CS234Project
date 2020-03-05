@@ -19,11 +19,14 @@ class QState(Grid.State):
             tip = self.state.tips[col]
             flattened_spaces = np.append(flattened_spaces, tip[0])
             flattened_spaces = np.append(flattened_spaces, tip[1])
-        return torch.tensor(flattened_spaces)
+        return torch.from_numpy(flattened_spaces)
 
 
     def is_winning(self):
         return self.state.is_winning()
+
+    def is_viable_action(self, action):
+        return self.state.is_viable_action(action)
 
     def next_state(self, action_tuple):
         return QState(self.state.next_state(action_tuple))

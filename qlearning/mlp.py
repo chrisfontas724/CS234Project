@@ -1,6 +1,7 @@
 
 import torch
 import torch.nn as nn
+from torch.autograd import Variable
 import torch.nn.functional as F
 from models.grid import Grid
 import numpy as np
@@ -35,11 +36,12 @@ class MLP(nn.Module):
 
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
-        self.softmax = nn.Softmax(1)
+        self.softmax = nn.Softmax(dim=0)
 
     def forward(self, x):
-    	for h in range(self.config.num_hidden):
-    		x = self.layers[h](x)
-    		x = self.sigmoid(x)
-    	x = self.output(x)
-    	x = self.softmax(x)
+        for h in range(self.config.num_hidden):
+            x = self.layers[h](x)
+            x = self.sigmoid(x)
+        x = self.output(x)
+        x = self.softmax(x)
+        return x
