@@ -5,6 +5,7 @@ import numpy as np
 import torch.optim as optim
 import torch
 import torch.nn as nn
+from renderer.renderer import GridRenderer
 
 
 def train(grid, mlp, loss_function, optimizer):
@@ -27,6 +28,8 @@ def train(grid, mlp, loss_function, optimizer):
 		new_state_q_values = mlp(new_features.float())
 		_, new_index = new_state_q_values.max(0)
 
+		print("Q Values: " + str(new_state_q_values[new_index]) + " " + str(old_state_q_values[index]))
+
 		loss = loss_function(reward + new_state_q_values[new_index], old_state_q_values[index])
 		print("LOSS: ", loss)
 		print("\n")
@@ -34,13 +37,20 @@ def train(grid, mlp, loss_function, optimizer):
 		loss.backward()
 		optimizer.step()
 
+		for param in mlp.parameters():
+  			print(param.data)
+
+	return mlp
 
 
 def play(grid, mlp):
 
+	renderer = GridRenderer("Q-Learning")
+
 	# Wrap the states as QStates to get functionality
 	# specifically needed for Q-learning.
 	state = QState(grid.start_state)
+	won = False
 	while True:
     	# Grab the feature vector for the given QState.
 		features = state.get_feature_vector()
@@ -62,27 +72,34 @@ def play(grid, mlp):
 		print("Take action: ", action)
 
 		if not state.is_viable_action(action):
-			return False
+			break
 
      	# Advance to the next state.
 		state = state.next_state(action)
-     
+
+
 		# Break if we're in the winning state.
 		if state.is_winning():
-			return True
+			won = True
+			break
+	
+	renderer.render(state.state)
+	renderer.tear_down()
+
+	return won
 
 def main():
     # Hardcode a simple grid for now.
 	grid = Grid(filename="levels/grid_1.txt")
 
 	# Create the MLP network with the configuration.
-	mlp_config = MLPConfig(grid.size, grid.num_cols)
+	mlp_config = MLPConfig(grid.size, grid.num_cols, 20)
 	mlp = MLP(mlp_config)
 	mlp = mlp.float()
 
 	criterion = nn.MSELoss()
 	optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
-	train(grid, mlp, criterion, optimizer)
+	mlp = train(grid, mlp, criterion, optimizer)
 
 	status = play(grid, mlp)
 	print("We " + ("won \\^_^/" if status else "lost =("))

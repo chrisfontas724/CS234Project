@@ -12,10 +12,10 @@ import random
 # including the dimensions of its input and output layers, to
 # accommodate boards of different sizes.
 class MLPConfig:
-    def __init__(self, board_size, num_colors):
+    def __init__(self, board_size, num_colors, num_hidden=5):
         self.board_size = board_size
         self.num_colors = num_colors
-        self.num_hidden = 5
+        self.num_hidden = num_hidden
         self.nodes_per_layer = 5
         self.num_actions = num_colors * 4
         self.exploration_rate = 0.1
