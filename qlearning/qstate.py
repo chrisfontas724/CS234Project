@@ -13,12 +13,19 @@ class QState(Grid.State):
     # state of the board as well as the current flow tips appened
     # to the end.
     def get_feature_vector(self):
-    	flattened_spaces = self.state.spaces.flatten()
-    	for col in range(1, self.state.info.num_cols + 1):
-    		tip = self.state.tips[col];
-    		flattened_spaces.append(tip[0])
-    		flattened_spaces.append(tip[1])
-    	return flattened_spaces
+        flattened_spaces = self.state.spaces.flatten()
+        for col in range(1, self.state.info.num_cols + 1):
+            tip = self.state.tips[col]
+            np.append(flattened_spaces, tip[0])
+            np.append(flattened_spaces, tip[1])
+        return flattened_spaces
+
+
+    def is_winning(self):
+        return self.state.is_winning()
+
+    def next_state(self, action_tuple):
+        return QState(self.state.next_state(action_tuple))
 
     # This overrides the |next state| function from the parent class.
     # The difference here is that since we are doing Q-learning, actions
