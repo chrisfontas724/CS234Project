@@ -10,6 +10,7 @@ import copy
 import torch.nn.functional as F
 import random
 from optparse import OptionParser
+from matplotlib import pyplot as plt
 
 max_items_in_replay = 10000
 
@@ -67,6 +68,7 @@ def train(size, gamma=0.9):
 	train_steps = 10000000
 	average_loss = 0.
 	target_state_dict = None
+	losses = list()
 	for i in range(train_steps):
 		# Update the target nextwork to match the update network.
 		if i % update_target == 0:
@@ -80,8 +82,6 @@ def train(size, gamma=0.9):
 			if not torch.all(torch.eq(item, target_mlp.state_dict()[key])):
 				print("Target has been altered!")
 
-		#print("\n\n")
-		#print(str(mlp.state_dict().values()))
 
 		# Sample a random mini-batch from the replay buffer.
 		batch = get_mini_batch(replay_buffer)
@@ -110,6 +110,7 @@ def train(size, gamma=0.9):
 		# Get average loss
 		loss = loss_function(target_values, model_values)
 
+
 		# Remove the oldest elements from the replay buffer.
 		if len(replay_buffer) > 1500:
 			replay_buffer = replay_buffer[len(replay_buffer)-1500:]
@@ -127,12 +128,15 @@ def train(size, gamma=0.9):
 		# Print out loss calculations.		
 		if i % 10 == 0:
 			print("Iteration " + str(i) + " average loss: " + str(average_loss / 10))
+			losses.append(average_loss / 10)
 			average_loss = 0.0
 
 		if i % 1000 == 0:
 			test_play = play(mlp, size)
 			print("Test won!") if test_play else print("Test lost!")
 
+	plt.plot(losses)
+	plt.show()
 	return mlp
 
 
@@ -186,7 +190,7 @@ def main():
 	options, args = get_options()
 	print("Training with boards of size ", options.size)
 
-	mlp = train(options.size)
+	mlp = train(int(options.size))
 	torch.save(mlp.state_dict(), "q_models/model.txt")
 
 	status = play(mlp, size)
