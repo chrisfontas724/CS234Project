@@ -58,7 +58,7 @@ def train(size, gamma=0.9):
 	mlp = make_mlp(4,3)
 	replay_buffer = initialize_replay_buffer(load_grids(4), mlp)
 
-	optimizer = optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
+	optimizer = torch.optim.Adam(mlp.parameters(), lr=0.01) # optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
 	loss_function = torch.nn.MSELoss()
 
 	target_mlp = None
@@ -99,7 +99,8 @@ def train(size, gamma=0.9):
 		loss = loss_function(target_values, model_values)
 
 		# Remove the oldest elements from the replay buffer.
-		replay_buffer = replay_buffer[len(batch):]
+		if len(replay_buffer) > 1500:
+			replay_buffer = replay_buffer[len(replay_buffer)-1500:]
 
 		# Perform gradient descent.
 		loss.backward(retain_graph=True)
