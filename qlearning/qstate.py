@@ -19,7 +19,7 @@ class QState(Grid.State):
             tip = self.state.tips[col]
             flattened_spaces = np.append(flattened_spaces, tip[0])
             flattened_spaces = np.append(flattened_spaces, tip[1])
-        return torch.from_numpy(flattened_spaces)
+        return torch.from_numpy(flattened_spaces).float()
 
 
     def is_winning(self):

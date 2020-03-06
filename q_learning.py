@@ -39,9 +39,6 @@ def train(size, gamma=0.9):
 		# Grab the feature vectors for the current state.
 		features = state.get_feature_vector()
 
-		# Get the q values for the state from the update network.
-		old_state_q_values = mlp(features.float())
-
 		# Use e-greedy to get the next action.
 		action, q_sa = mlp.get_next_action(features, grad=True)
 
@@ -54,8 +51,7 @@ def train(size, gamma=0.9):
 		if terminal:
 			q_prime_sa = torch.tensor(0.)
 		else:
-			new_features = new_state.get_feature_vector()
-			_, q_prime_sa = target_mlp.greedy_action(new_features.float(), grad=False)
+			_, q_prime_sa = target_mlp.greedy_action(new_state.get_feature_vector(), grad=False)
 
 		# Calculate loss.
 		loss = loss_function(reward + gamma*q_prime_sa, q_sa)
@@ -99,7 +95,7 @@ def play(mlp):
 		features = state.get_feature_vector()
 
 		# Get best action from the MLP.
-		action, _ = mlp.greedy_action(features.float())
+		action, _ = mlp.greedy_action(features)
 		print("Take action: ", action)
 
 		if not state.is_viable_action(action):
