@@ -34,7 +34,6 @@ def initialize_replay_buffer(grids, mlp):
 	return result
 
 
-
 def get_mini_batch(replay_buffer, num_samples=50):
 	# To preserve the order of the list, you could do:
 	randIndex = random.sample(range(len(replay_buffer)), num_samples)
@@ -69,6 +68,7 @@ def train(size, gamma=0.9):
 	for i in range(train_steps):
 		# Update the target nextwork to match the update network.
 		if i % update_target == 0:
+			print("Update target network!")
 			target_mlp = update_target_network(mlp)
 
 
@@ -100,11 +100,12 @@ def train(size, gamma=0.9):
 		# Remove the oldest elements from the replay buffer.
 		replay_buffer = replay_buffer[len(batch):]
 
-       	# Perform gradient descent.
-		optimizer.zero_grad()
+		# Perform gradient descent.
 		loss.backward(retain_graph=True)
 		optimizer.step()
 		average_loss += loss.item()
+
+		optimizer.zero_grad()
 
 		# Print out loss calculations.		
 		if i % 10 == 0:
