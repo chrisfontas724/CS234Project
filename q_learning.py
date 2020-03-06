@@ -9,6 +9,7 @@ from renderer.renderer import GridRenderer
 import copy
 import torch.nn.functional as F
 import random
+from optparse import OptionParser
 
 max_items_in_replay = 10000
 
@@ -62,7 +63,7 @@ def train(size, gamma=0.9):
 	loss_function = torch.nn.MSELoss()
 
 	target_mlp = None
-	update_target = 1000
+	update_target = 10000
 	train_steps = 10000000
 	average_loss = 0.
 	target_state_dict = None
@@ -114,11 +115,14 @@ def train(size, gamma=0.9):
 			replay_buffer = replay_buffer[len(replay_buffer)-1500:]
 
 		# Perform gradient descent.
+		optimizer.zero_grad()
 		loss.backward(retain_graph=True)
+		for param in mlp.parameters():
+			param.grad.data.clamp_(-1, 1)
+		
 		optimizer.step()
 		average_loss += loss.item()
 
-		optimizer.zero_grad()
 
 		# Print out loss calculations.		
 		if i % 10 == 0:
@@ -164,8 +168,25 @@ def play(mlp, size=4):
 
 	return won
 
+
+def get_options():
+	parser = OptionParser()
+
+	parser.add_option("-s", "--size",
+						action="store", # optional because action defaults to "store"
+                      	dest="size",
+                      	default=5,
+                      	help="Size of board to use",)
+
+	return parser.parse_args()
+
 def main():
-	mlp = train(4)
+
+	# Grab the command line options.
+	options, args = get_options()
+	print("Training with boards of size ", options.size)
+
+	mlp = train(options.size)
 	torch.save(mlp.state_dict(), "q_models/model.txt")
 
 	status = play(mlp, size)
