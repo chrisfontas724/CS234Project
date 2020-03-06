@@ -62,7 +62,7 @@ def train(size, gamma=0.9):
 	loss_function = torch.nn.MSELoss()
 
 	target_mlp = None
-	update_target = 100
+	update_target = 1000
 	train_steps = 10000000
 	average_loss = 0.
 	for i in range(train_steps):
@@ -71,21 +71,22 @@ def train(size, gamma=0.9):
 			print("Update target network!")
 			target_mlp = update_target_network(mlp)
 
-
 		# Sample a random mini-batch from the replay buffer.
 		batch = get_mini_batch(replay_buffer)
-		loss = torch.tensor(0.)
-		for sars in batch:
+		target_values = torch.zeros([len(batch), 1], dtype=torch.float32)
+		model_values = torch.zeros([len(batch), 1], dtype=torch.float32)
+
+		for b in range(len(batch)):
 			# Expand out the tuple.
-			state, action, reward, q_sa, new_state, terminal = sars
+			state, action, reward, q_sa, new_state, terminal = batch[b]
 
 			# Get the maximum action for q(s',a'; w-). If we're
 			# in the terminal/winning state, then there is no next
 			# state, and so q_prime_sa is just 0.
 			_, q_prime_sa = target_mlp.greedy_action(new_state.get_feature_vector(), grad=False) if terminal else None, torch.tensor(0.)
 
-			# Update the  loss.
-			loss += loss_function(reward + gamma*q_prime_sa, q_sa)
+			target_values[b] = reward + gamma*q_prime_sa
+			model_values[b] = q_sa
 
 			# Update the entries in the replay buffer. Don't bother adding winning states in
 			# because they have no viable actions.
@@ -95,7 +96,7 @@ def train(size, gamma=0.9):
 				replay_buffer.append((new_state, updated_action, reward, updated_qsa, updated_state, terminal))
 
 		# Get average loss
-		loss /= len(batch)
+		loss = loss_function(target_values, model_values)
 
 		# Remove the oldest elements from the replay buffer.
 		replay_buffer = replay_buffer[len(batch):]
