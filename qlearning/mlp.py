@@ -16,7 +16,7 @@ class MLPConfig:
         self.board_size = board_size
         self.num_colors = num_colors
         self.num_hidden = num_hidden
-        self.nodes_per_layer = 7
+        self.nodes_per_layer = (self.board_size * self.board_size + 2*self.num_colors) * 2
         self.num_actions = num_colors * 4
         self.exploration_rate = 0.1
 

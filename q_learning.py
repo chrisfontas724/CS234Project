@@ -48,15 +48,15 @@ def update_target_network(mlp):
 
 def make_mlp(size, cols):
 	# Create the MLP network with the configuration.
-	mlp_config = MLPConfig(size, cols, 30)
+	mlp_config = MLPConfig(size, cols, 50)
 	mlp = MLP(mlp_config)
 	mlp = mlp.float()
 	return mlp
 
 
 def train(size, gamma=0.9):
-	mlp = make_mlp(4,3)
-	replay_buffer = initialize_replay_buffer(load_grids(4), mlp)
+	mlp = make_mlp(size, size-1)
+	replay_buffer = initialize_replay_buffer(load_grids(size), mlp)
 
 	optimizer = torch.optim.Adam(mlp.parameters(), lr=0.01) # optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
 	loss_function = torch.nn.MSELoss()
@@ -65,11 +65,22 @@ def train(size, gamma=0.9):
 	update_target = 1000
 	train_steps = 10000000
 	average_loss = 0.
+	target_state_dict = None
 	for i in range(train_steps):
 		# Update the target nextwork to match the update network.
 		if i % update_target == 0:
 			print("Update target network!")
 			target_mlp = update_target_network(mlp)
+			target_state_dict = copy.deepcopy(target_mlp.state_dict())
+
+		# Sanity check to make sure we're not accidentally modifying the
+		# target network in between updates.
+		for key,item in target_state_dict.items():
+			if not torch.all(torch.eq(item, target_mlp.state_dict()[key])):
+				print("Target has been altered!")
+
+		#print("\n\n")
+		#print(str(mlp.state_dict().values()))
 
 		# Sample a random mini-batch from the replay buffer.
 		batch = get_mini_batch(replay_buffer)
@@ -90,7 +101,7 @@ def train(size, gamma=0.9):
 
 			# Update the entries in the replay buffer. Don't bother adding winning states in
 			# because they have no viable actions.
-			if not new_state.is_winning():
+			if not terminal:
 				updated_action, updated_qsa = mlp.get_next_action(new_state.get_feature_vector(), grad=True)
 				updated_state, reward, terminal = new_state.step(action)
 				replay_buffer.append((new_state, updated_action, reward, updated_qsa, updated_state, terminal))
@@ -114,12 +125,16 @@ def train(size, gamma=0.9):
 			print("Iteration " + str(i) + " average loss: " + str(average_loss / 10))
 			average_loss = 0.0
 
+		if i % 1000 == 0:
+			test_play = play(mlp, size)
+			print("Test won!") if test_play else print("Test lost!")
+
 	return mlp
 
 
-def play(mlp):
-	grid = Grid(filename="levels/grid_1.txt")
-	renderer = GridRenderer("Q-Learning")
+def play(mlp, size=4):
+	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_950.txt")
+	#renderer = GridRenderer("Q-Learning")
 
 	# Wrap the states as QStates to get functionality
 	# specifically needed for Q-learning.
@@ -130,7 +145,7 @@ def play(mlp):
 		features = state.get_feature_vector()
 
 		# Get best action from the MLP.
-		action, _ = mlp.greedy_action(features)
+		action, _ = mlp.greedy_action(features, grad=False)
 		print("Take action: ", action)
 
 		if not state.is_viable_action(action):
@@ -143,9 +158,9 @@ def play(mlp):
 		if state.is_winning():
 			won = True
 			break
-	
-	renderer.render(state.state)
-	renderer.tear_down()
+	#
+	#renderer.render(state.state)
+	#renderer.tear_down()
 
 	return won
 
@@ -153,7 +168,7 @@ def main():
 	mlp = train(4)
 	torch.save(mlp.state_dict(), "q_models/model.txt")
 
-	status = play(mlp)
+	status = play(mlp, size)
 	print("We " + ("won \\^_^/" if status else "lost =("))
 
 if __name__ == "__main__":
