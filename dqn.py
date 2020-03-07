@@ -13,7 +13,8 @@ from optparse import OptionParser
 from matplotlib import pyplot as plt
 
 
-max_items_in_replay = 15000
+starting_items_in_replay = 15000
+max_items_in_replay = 100000
 
 def load_grids(size):
 	print("Loading grids....")
@@ -34,12 +35,14 @@ def initialize_replay_buffer(grids, mlp):
 		result.append(sars)
 	return result
 
+# Hacky/test function to see if we can get DQN working with just a single board, instead
+# of with the entire training set.
 def initialize_replay_buffer_with_single_grid(size, mlp):
 	print("Initialize replay buffer with single board")
 	result = list()
 	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_950.txt")
 	state = QState(grid.start_state)
-	for i in range(max_items_in_replay):
+	for i in range(starting_items_in_replay):
 		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True)
 		new_state, reward, terminal = state.step(action)
 		sars = (state, action, reward, q_sa, new_state, terminal)
@@ -47,12 +50,15 @@ def initialize_replay_buffer_with_single_grid(size, mlp):
 		state = new_state if not terminal else QState(grid.start_state)
 	return result
 
+# Randomly select |num_samples| sars tuples from the replay buffer.
 def get_mini_batch(replay_buffer, num_samples=50):
 	# To preserve the order of the list, you could do:
 	randIndex = random.sample(range(len(replay_buffer)), num_samples)
 	randIndex.sort()
 	return [replay_buffer[i] for i in randIndex]
 
+# Copy over the input training network to the target network by doing
+# a deep copy over its entire state dict.
 def update_target_network(mlp):
 	target_mlp = MLP(mlp.config)
 	target_mlp.load_state_dict(copy.deepcopy(mlp.state_dict()))
@@ -61,7 +67,7 @@ def update_target_network(mlp):
 
 def make_mlp(size, cols):
 	# Create the MLP network with the configuration.
-	mlp_config = MLPConfig(size, cols, 50)
+	mlp_config = MLPConfig(size, cols,  num_hidden=6)
 	mlp = MLP(mlp_config)
 	mlp = mlp.float()
 	return mlp
