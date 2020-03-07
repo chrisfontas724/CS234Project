@@ -103,7 +103,7 @@ def policy_iteration(grid, starting_policy=dict(), starting_value_function=dict(
 
 def value_iteration(grid, starting_policy=dict(), starting_value_function=dict(), gamma=0.9, tol=1e-3):
 	print("Begin value iteration...")
-	states = grid.generate_all_states()
+	states = self.generate_all_states()
 	nS = len(states)
 	print("num states: ", nS)
 

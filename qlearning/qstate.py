@@ -11,7 +11,7 @@ class QState(Grid.State):
 
     # Return a feature vector for the given state to pass into. The
     # feature vector is a flat array consisting of the flattened
-    # state of the board as well as the current flow tips appened
+    # state of the board as well as the current flow tips append
     # to the end.
     def get_feature_vector(self):
         flattened_spaces = self.state.spaces.flatten()

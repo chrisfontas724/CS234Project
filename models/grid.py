@@ -4,7 +4,7 @@ import itertools
 import copy 
 import sys
 
-# Maps the action index to a spcific move. The action numbers
+# Maps the action index to a specific move. The action numbers
 # 0,1,2,3 correspond to (up, right, down, left) - going around
 # clockwise. The first coordinate is the row and the second
 # coordinate is the column.
