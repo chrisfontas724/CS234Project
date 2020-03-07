@@ -110,9 +110,9 @@ def get_options():
 
 	parser.add_option("-m", "--mode",
 						action="store", # optional because action defaults to "store"
-                      	dest="size",
+                      	dest="mode",
                       	default="train",
-                      	help="Size of board to use",)
+                      	help="train or test",)
 
 	return parser.parse_args()
 
@@ -123,13 +123,12 @@ def main():
 	print("Training with boards of size ", options.size)
 
 	if options.mode == "train":
-
 		Q = train(size=int(options.size), gamma=0.9)
 		with open("tabular/" + options.size +"x" + options.size + ".pickle", 'wb') as handle:
 			pickle.dump(Q, handle, protocol=pickle.HIGHEST_PROTOCOL)
 	else:
-      	with open("tabular/" + options.size +"x" + options.size + ".pickle", 'rb') as handle:
-        	Q = pickle.load(handle)
+		with open("tabular/" + options.size +"x" + options.size + ".pickle", 'rb') as handle:
+			Q = pickle.load(handle)
 		final = play(Q,size=int(options.size))
 		print("Results: ", final)
 
