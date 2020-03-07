@@ -13,7 +13,7 @@ from optparse import OptionParser
 from matplotlib import pyplot as plt
 
 
-max_items_in_replay = 100000
+max_items_in_replay = 15000
 
 def load_grids(size):
 	print("Loading grids....")

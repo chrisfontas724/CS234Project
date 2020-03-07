@@ -14,11 +14,34 @@ class QState(Grid.State):
     # state of the board as well as the current flow tips appened
     # to the end.
     def get_feature_vector(self):
+
+        # Start the feature vector off with the flattened positions
+        # of all the flows.
         flattened_spaces = self.state.spaces.flatten()
+
+        # Add the starting points, ending points, and current tips
+        # to the feature vector
+        start_points = self.state.info.color_start_coords
+        end_points = self.state.info.color_end_coords
         for col in range(1, self.state.info.num_cols + 1):
             tip = self.state.tips[col]
+            start = start_points[col]
+            end = end_points[col]
             flattened_spaces = np.append(flattened_spaces, tip[0])
             flattened_spaces = np.append(flattened_spaces, tip[1])
+            flattened_spaces = np.append(flattened_spaces, start[0])
+            flattened_spaces = np.append(flattened_spaces, start[1])
+            flattened_spaces = np.append(flattened_spaces, end[0])
+            flattened_spaces = np.append(flattened_spaces, end[1])
+
+        # Add in the number of possible actions.
+        flattened_spaces = np.append(flattened_spaces, len(self.state.possible_actions()))
+
+        # Add in if this is a winning state or not.
+        flattened_spaces = np.append(flattened_spaces, int(self.is_winning()))
+
+
+        # Make sure the vector is in float format before returning.
         return torch.from_numpy(flattened_spaces).float()
 
 

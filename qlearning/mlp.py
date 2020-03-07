@@ -16,7 +16,8 @@ class MLPConfig:
         self.board_size = board_size
         self.num_colors = num_colors
         self.num_hidden = num_hidden
-        self.nodes_per_layer = (self.board_size * self.board_size + 2*self.num_colors) * 2
+        self.feature_vector_size = (self.board_size **2) + 6*self.num_colors + 2
+        self.nodes_per_layer = self.feature_vector_size * 2
         self.num_actions = num_colors * 4
         self.exploration_rate = 0.1
 
@@ -30,7 +31,7 @@ class MLP(nn.Module):
 
         self.config = config
         self.layers = []
-        input_size = config.board_size * config.board_size + 2*config.num_colors
+        input_size = self.config.feature_vector_size
         for h in range(config.num_hidden):
         	self.layers.append(nn.Linear(input_size, config.nodes_per_layer))
         	input_size = config.nodes_per_layer
