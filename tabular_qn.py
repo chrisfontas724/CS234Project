@@ -26,7 +26,7 @@ def train(size, gamma=0.9):
 	for i in range(5000000):
 		if i%1000==0:
 			print("Iteration ", i)
-			if epsilon >0.05:
+			if epsilon > 0.05:
 				epsilon -= 0.05
 
 
@@ -104,9 +104,13 @@ def get_options():
 	parser.add_option("-s", "--size",
 						action="store", # optional because action defaults to "store"
                       	dest="size",
-						mode = "train",
                       	default=4,
                       	help="Size of board to use",)
+	parser.add_option("-m", "--mode",
+					  action="store",  # optional because action defaults to "store"
+					  dest="size",
+					  default="Train",
+					  help="Size of board to use", )
 
 	return parser.parse_args()
 
@@ -117,11 +121,11 @@ def main():
 	print("Training with boards of size ", options.size)
 
 	Q = train(size=int(options.size), gamma=0.9)
-	if options.mode == "train" :
+	if options.mode == "Train" :
+		Q = train(size=int(options.size), gamma=0.9)
 		with open("tabular/" + options.size +"x" + options.size + ".pickle", 'wb') as handle:
 			pickle.dump(Q, handle, protocol=pickle.HIGHEST_PROTOCOL)
-	else:
-
+	#else:
 	final = play(Q,size=int(options.size))
 	print("Results: ", final)
 
