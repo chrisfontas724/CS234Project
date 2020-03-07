@@ -3,8 +3,7 @@ import numpy as np
 import random
 from optparse import OptionParser
 from renderer.renderer import GridRenderer as Renderer
-
-
+import pickle
 
 
 
