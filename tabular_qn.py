@@ -12,7 +12,7 @@ from renderer.renderer import GridRenderer as Renderer
 # Train a tabular dqn model here.
 def train(size, gamma=0.9):
 
-	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "1" + ".txt")
+	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "2" + ".txt")
 	epsilon = 1.0
 	#states = grid.generate_all_states()
 	#state_size = len(states)
@@ -23,10 +23,10 @@ def train(size, gamma=0.9):
 	Q = dict() #np.zeros((state_size, action_size))
 
 	state = grid.start_state
-	for i in range(5000000):
+	for i in range(2000000):
 		if i%1000==0:
 			print("Iteration ", i)
-			if epsilon > 0.05:
+			if epsilon > 0.15:
 				epsilon -= 0.05
 
 
@@ -66,7 +66,7 @@ def train(size, gamma=0.9):
 
 # Play tabular here.
 def play(Q, size):
-	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "1" + ".txt")
+	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "2" + ".txt")
 
 
 	state = grid.start_state
@@ -124,15 +124,15 @@ def main():
 	print("Training with boards of size ", options.size)
 
 
-	if options.mode == "train":
-		Q = train(size=int(options.size), gamma=0.9)
-		with open("tabular/" + options.size +"x" + options.size + ".pickle", 'wb') as handle:
-			pickle.dump(Q, handle, protocol=pickle.HIGHEST_PROTOCOL)
-	else:
-		with open("tabular/" + options.size +"x" + options.size + ".pickle", 'rb') as handle:
-			Q = pickle.load(handle)
-		final = play(Q,size=int(options.size))
-		print("Results: ", final)
+	#if options.mode == "train":
+	Q = train(size=int(options.size), gamma=0.9)
+		#with open("tabular/" + options.size +"x" + options.size + ".pickle", 'wb') as handle:
+			#pickle.dump(Q, handle, protocol=pickle.HIGHEST_PROTOCOL)
+	#else:
+		#with open("tabular/" + options.size +"x" + options.size + ".pickle", 'rb') as handle:
+			#Q = pickle.load(handle)
+	final = play(Q,size=int(options.size))
+	print("Results: ", final)
 
 
 if __name__ == "__main__":
