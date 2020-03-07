@@ -12,8 +12,8 @@ import random
 from optparse import OptionParser
 from matplotlib import pyplot as plt
 
-max_items_in_replay = 10000
 
+max_items_in_replay = 100000
 
 def load_grids(size):
 	print("Loading grids....")
@@ -35,6 +35,18 @@ def initialize_replay_buffer(grids, mlp):
 		result.append(sars)
 	return result
 
+def initialize_replay_buffer_with_single_grid(size, mlp):
+	print("Initialize replay buffer with single board")
+	result = list()
+	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_950.txt")
+	state = QState(grid.start_state)
+	for i in range(max_items_in_replay):
+		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True)
+		new_state, reward, terminal = state.step(action)
+		sars = (state, action, reward, q_sa, new_state, terminal)
+		result.append(sars)
+		state = new_state if not terminal else QState(grid.start_state)
+	return result
 
 def get_mini_batch(replay_buffer, num_samples=50):
 	# To preserve the order of the list, you could do:
@@ -58,13 +70,13 @@ def make_mlp(size, cols):
 
 def train(size, gamma=0.9):
 	mlp = make_mlp(size, size-1)
-	replay_buffer = initialize_replay_buffer(load_grids(size), mlp)
+	replay_buffer = initialize_replay_buffer_with_single_grid(size, mlp)  #initialize_replay_buffer(load_grids(size), mlp)
 
 	optimizer = torch.optim.Adam(mlp.parameters(), lr=0.01) # optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
 	loss_function = torch.nn.MSELoss()
 
 	target_mlp = None
-	update_target = 10000
+	update_target = 1000
 	train_steps = 10000000
 	average_loss = 0.
 	target_state_dict = None
@@ -84,7 +96,7 @@ def train(size, gamma=0.9):
 
 
 		# Sample a random mini-batch from the replay buffer.
-		batch = get_mini_batch(replay_buffer)
+		batch = get_mini_batch(replay_buffer, 200)
 		target_values = torch.zeros([len(batch), 1], dtype=torch.float32)
 		model_values = torch.zeros([len(batch), 1], dtype=torch.float32)
 
@@ -112,8 +124,8 @@ def train(size, gamma=0.9):
 
 
 		# Remove the oldest elements from the replay buffer.
-		if len(replay_buffer) > 1500:
-			replay_buffer = replay_buffer[len(replay_buffer)-1500:]
+		if len(replay_buffer) > max_items_in_replay:
+			replay_buffer = replay_buffer[len(replay_buffer)-max_items_in_replay:]
 
 		# Perform gradient descent.
 		optimizer.zero_grad()
@@ -132,8 +144,10 @@ def train(size, gamma=0.9):
 			average_loss = 0.0
 
 		if i % 1000 == 0:
-			test_play = play(mlp, size)
-			print("Test won!") if test_play else print("Test lost!")
+			# test_play = play(mlp, size)
+			# print("Test won!") if test_play else print("Test lost!")
+			torch.save(mlp.state_dict(), "q_models/" + str(size) + "x" + str(size) + "_" + "model_v2.txt")
+
 
 	plt.plot(losses)
 	plt.show()
@@ -173,6 +187,7 @@ def play(mlp, size=4):
 	return won
 
 
+# Determines the board size we will be using for training.
 def get_options():
 	parser = OptionParser()
 
@@ -185,7 +200,6 @@ def get_options():
 	return parser.parse_args()
 
 def main():
-
 	# Grab the command line options.
 	options, args = get_options()
 	print("Training with boards of size ", options.size)
@@ -193,7 +207,7 @@ def main():
 	mlp = train(int(options.size))
 	torch.save(mlp.state_dict(), "q_models/model.txt")
 
-	status = play(mlp, size)
+	status = play(mlp, int(options.size))
 	print("We " + ("won \\^_^/" if status else "lost =("))
 
 if __name__ == "__main__":
