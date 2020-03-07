@@ -22,7 +22,7 @@ def train(size, gamma=0.9):
 	Q = dict() #np.zeros((state_size, action_size))
 
 	state = grid.start_state
-	for i in range(5000000):
+	for i in range(6000000):
 		if i%1000==0:
 			print("Iteration ", i)
 			if epsilon >0.05:
@@ -56,7 +56,11 @@ def train(size, gamma=0.9):
 
 		Q[state][action] = Q[state][action] + lr * (reward + gamma * np.max(Q[new_state]) - Q[state][action])
 
-		state = new_state if not new_state.is_winning() else grid.start_state
+		if new_state.is_winning():
+			state = grid.start_state
+			epsilon = 1.0
+		else:
+			state = new_state
 
 	return Q
 
@@ -67,33 +71,36 @@ def train(size, gamma=0.9):
 def play(Q, size):
 	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "1" + ".txt")
 
+	epsilon = 0.05
+	action_size = 4 * (size-1) # number of colors is 4 in 5*5 grid
 
 	state = grid.start_state
 	won = False
 	while True:
 
-		action = np.argmax(Q[state])
+		if random.uniform(0, 1) < epsilon:
+			action = random.randint(0,action_size-1)
+		else:
+			action = np.argmax(Q[state])
 
 		color = int(action / 4 + 1)
 		direction = int(action % 4)
 		action_tu = (color, direction)
-		print("Take action: ", action_tu)
 
 		if not state.is_viable_action(action_tu):
-			break
+			continue
 
 		# Advance to the next state.
 		state = state.next_state(action_tu)
-
-		renderer = Renderer("Play")
-		renderer.render(state)
-		renderer.tear_down()
 
 		# Break if we're in the winning state.
 		if state.is_winning():
 			won = True
 			break
 
+	renderer = Renderer("Play")
+	renderer.render(state)
+	renderer.tear_down()
 	return won
 
 # Determines the board size we will be using for training.
