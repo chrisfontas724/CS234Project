@@ -14,7 +14,7 @@ from matplotlib import pyplot as plt
 
 
 starting_items_in_replay = 15000
-max_items_in_replay = 100000
+max_items_in_replay = 10000000
 
 def load_grids(size):
 	print("Loading grids....")
@@ -26,36 +26,33 @@ def load_grids(size):
 
 def initialize_replay_buffer(grids, mlp):
 	print("Initializing replay buffer...")
-	result = list()
+	result = set()
 	for grid in grids:
 		state = QState(grid.start_state)
 		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True)
 		new_state, reward, terminal = state.step(action)
 		sars = (state, action, reward, q_sa, new_state, terminal)
-		result.append(sars)
+		result.add(sars)
 	return result
 
 # Hacky/test function to see if we can get DQN working with just a single board, instead
 # of with the entire training set.
 def initialize_replay_buffer_with_single_grid(size, mlp):
 	print("Initialize replay buffer with single board")
-	result = list()
+	result = set()
 	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_950.txt")
 	state = QState(grid.start_state)
 	for i in range(starting_items_in_replay):
 		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True)
 		new_state, reward, terminal = state.step(action)
 		sars = (state, action, reward, q_sa, new_state, terminal)
-		result.append(sars)
+		result.add(sars)
 		state = new_state if not terminal else QState(grid.start_state)
 	return result
 
 # Randomly select |num_samples| sars tuples from the replay buffer.
 def get_mini_batch(replay_buffer, num_samples=50):
-	# To preserve the order of the list, you could do:
-	randIndex = random.sample(range(len(replay_buffer)), num_samples)
-	randIndex.sort()
-	return [replay_buffer[i] for i in randIndex]
+	return random.sample(replay_buffer, num_samples)
 
 # Copy over the input training network to the target network by doing
 # a deep copy over its entire state dict.
@@ -71,7 +68,6 @@ def make_mlp(size, cols):
 	mlp = MLP(mlp_config)
 	mlp = mlp.float()
 	return mlp
-
 
 def train(size, gamma=0.9):
 	mlp = make_mlp(size, size-1)
@@ -99,7 +95,6 @@ def train(size, gamma=0.9):
 			if not torch.all(torch.eq(item, target_mlp.state_dict()[key])):
 				print("Target has been altered!")
 
-
 		# Sample a random mini-batch from the replay buffer.
 		batch = get_mini_batch(replay_buffer, 200)
 		target_values = torch.zeros([len(batch), 1], dtype=torch.float32)
@@ -122,7 +117,7 @@ def train(size, gamma=0.9):
 			if not terminal:
 				updated_action, updated_qsa = mlp.get_next_action(new_state.get_feature_vector(), grad=True)
 				updated_state, reward, terminal = new_state.step(action)
-				replay_buffer.append((new_state, updated_action, reward, updated_qsa, updated_state, terminal))
+				replay_buffer.add((new_state, updated_action, reward, updated_qsa, updated_state, terminal))
 
 		# Get average loss
 		loss = loss_function(target_values, model_values)

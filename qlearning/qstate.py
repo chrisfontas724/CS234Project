@@ -44,6 +44,8 @@ class QState(Grid.State):
         # Make sure the vector is in float format before returning.
         return torch.from_numpy(flattened_spaces).float()
 
+    def __hash__(self):
+        return hash((str(self.state.spaces.tolist()), str(self.state.tips)))
 
     def is_winning(self):
         return self.state.is_winning()
