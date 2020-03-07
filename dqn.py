@@ -23,7 +23,6 @@ def load_grids(size):
 		grids.append(grid)
 	return grids
 
-
 def initialize_replay_buffer(grids, mlp):
 	print("Initializing replay buffer...")
 	result = list()
