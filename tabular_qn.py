@@ -80,7 +80,7 @@ def play(file, Q, size):
 	grid = Grid(filename=file)
 	print("Playing ", file)
 
-	epsilon = 0.005
+	epsilon = 0.001
 	action_size = 4 * (size-1) # number of colors is (size-1), number of directions is 4.
 
 	state = grid.start_state
