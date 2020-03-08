@@ -19,7 +19,6 @@ class MLPConfig:
         self.feature_vector_size = (self.board_size **2) + 6*self.num_colors + 2
         self.nodes_per_layer = self.feature_vector_size * 2
         self.num_actions = num_colors * 4
-        self.exploration_rate = 0.1
 
 
 # This MLP is used as the value function approximation (VFA) for
@@ -51,8 +50,8 @@ class MLP(nn.Module):
     def get_Q(self, state):
         return self(state.float())
 
-    def get_next_action(self, state, grad):
-        if random.random() > self.config.exploration_rate: # Explore (gamble) or exploit (greedy)
+    def get_next_action(self, state, grad, exploration_rate):
+        if random.random() > exploration_rate: # Explore (gamble) or exploit (greedy)
             return self.greedy_action(state, grad)
         else:
             return self.random_action(state, grad)

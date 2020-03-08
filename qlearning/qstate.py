@@ -56,8 +56,15 @@ class QState(Grid.State):
     def next_state(self, action_tuple):
         return QState(self.state.next_state(action_tuple))
 
+    def num_zeroes_remaining(self):
+        return self.state.num_zeroes_remaining()
+
+    def completed_flow_count(self):
+        return self.state.completed_flow_count()
+
     # This overrides the |next state| function from the parent class.
-    # The difference here is that since we are doing Q-learning, actions
+    # The difference here is that since we are doing Q-learni
+    # ng, actions
     # that are impossible may be passed to the current state, in which case
     # we don't want to simply abort, but we should wind up in the same
     # state again.
@@ -72,14 +79,33 @@ class QState(Grid.State):
     # to determine if it should break or continue.
     def step(self, action):
 
-    	# We need to penalize impossible actions very highly.
-    	if not self.state.is_viable_action(action):
-    		return (self, -1000, False)
-    	else:
-    		state = self.next_state(action)
-    		won = state.is_winning()
-    		reward = 100000 if won else -1
-    		return (state, reward, won)
+        # We need to penalize impossible actions very highly.
+        if not self.state.is_viable_action(action):
+            return (self, -1000, False) #returns new state as current state
+        else:
+            state = self.next_state(action)
+            won = state.is_winning()
+
+            if won is True:
+                reward = 10000000
+                return(state, reward, won)
+
+            else:
+
+                zeros = self.state.num_zeroes_remaining() - state.num_zeroes_remaining()
+                reward = 100 * zeros
+
+
+                flow  = state.completed_flow_count() -  self.state.completed_flow_count()
+                reward += 100 * flow
+
+                return (state, reward, won)
+
+
+
+
+
+    #number of flows, number of zeros
 
 
 if __name__ == "__main__":

@@ -29,7 +29,7 @@ def initialize_replay_buffer(grids, mlp):
 	result = set()
 	for grid in grids:
 		state = QState(grid.start_state)
-		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True)
+		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True, exploration_rate = 1.0)
 		new_state, reward, terminal = state.step(action)
 		sars = (state, action, reward, q_sa, new_state, terminal)
 		result.add(sars)
@@ -40,10 +40,10 @@ def initialize_replay_buffer(grids, mlp):
 def initialize_replay_buffer_with_single_grid(size, mlp):
 	print("Initialize replay buffer with single board")
 	result = set()
-	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_950.txt")
+	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_100.txt")
 	state = QState(grid.start_state)
 	for i in range(starting_items_in_replay):
-		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True)
+		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True, exploration_rate=1.0)
 		new_state, reward, terminal = state.step(action)
 		sars = (state, action, reward, q_sa, new_state, terminal)
 		result.add(sars)
@@ -72,9 +72,10 @@ def make_mlp(size, cols):
 def train(size, gamma=0.9):
 	mlp = make_mlp(size, size-1)
 	replay_buffer = initialize_replay_buffer_with_single_grid(size, mlp)  #initialize_replay_buffer(load_grids(size), mlp)
-
+	epsilon = 1.0
 	optimizer = torch.optim.Adam(mlp.parameters(), lr=0.01) # optim.SGD(mlp.parameters(), lr=0.001, momentum=0.9)
 	loss_function = torch.nn.MSELoss()
+
 
 	target_mlp = None
 	update_target = 1000
@@ -83,6 +84,9 @@ def train(size, gamma=0.9):
 	target_state_dict = None
 	losses = list()
 	for i in range(train_steps):
+		if i%10000==0:
+			if epsilon > 0.1 :
+				epsilon -=9e-7
 		# Update the target nextwork to match the update network.
 		if i % update_target == 0:
 			print("Update target network!")
@@ -115,7 +119,7 @@ def train(size, gamma=0.9):
 			# Update the entries in the replay buffer. Don't bother adding winning states in
 			# because they have no viable actions.
 			if not terminal:
-				updated_action, updated_qsa = mlp.get_next_action(new_state.get_feature_vector(), grad=True)
+				updated_action, updated_qsa = mlp.get_next_action(new_state.get_feature_vector(), grad=True,exploration_rate=epsilon)
 				updated_state, reward, terminal = new_state.step(action)
 				replay_buffer.add((new_state, updated_action, reward, updated_qsa, updated_state, terminal))
 
@@ -143,10 +147,10 @@ def train(size, gamma=0.9):
 			losses.append(average_loss / 10)
 			average_loss = 0.0
 
-		if i % 1000 == 0:
+		if i % 10000 == 0:
 			# test_play = play(mlp, size)
 			# print("Test won!") if test_play else print("Test lost!")
-			torch.save(mlp.state_dict(), "q_models/" + str(size) + "x" + str(size) + "_" + "model_v2.txt")
+			torch.save(mlp.state_dict(), "q_models/" + str(size) + "x" + str(size) + "_" + str(i) + "_" + "model_v2.txt")
 
 
 	plt.plot(losses)

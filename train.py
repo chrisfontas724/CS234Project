@@ -55,7 +55,7 @@ def play_game(grid, policy, max_turns=100):
       action = policy[state]
 
     if action is None:
-      raise Exception("Action is none!")
+        continue
 
     print("ACTION: " + str(action))
     state = state.next_state(action)
@@ -77,31 +77,31 @@ def main():
       algorithm = policy_iteration if options.algorithm == "policy_iteration" else value_iteration
       value = dict()
       policy = dict()
-      for i in range(1,16): 
+      for i in range(1,900):
         print("Training iteration " + str(i))
-        grid = Grid(filename="levels/grid_" + str(i) + ".txt")
+        grid = Grid(filename="levels/4x4/grid_" + str(i) + ".txt")
         new_value, policy = algorithm(grid, policy, value)
         value = new_value.copy()
 
       # Save the result of training to a pickle file.
-      with open("policies/" + options.file + ".pickle", 'wb') as handle:
+      with open("policies/" + str(options.file) + ".pickle", 'wb') as handle:
         pickle.dump(policy, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     # If we're in test mode, then we load up an existing policy, and have it play
     # boards numbered 16-25. We count up how many of those 10 boards it wins.
     elif options.mode == "test":
       # Load up the pickle file we saved to during training.
-      with open("policies/" + options.file + ".pickle", 'rb') as handle:
+      with open("policies/" + str(options.file) + ".pickle", 'rb') as handle:
         policy = pickle.load(handle)
 
       print("Num keys: ", len(policy.keys()))
 
       num_wins = 0
-      for i in range(16, 25):
+      for i in range(900, 1000):
         print("Playing game " + str(i))
-        grid = Grid(filename="levels/grid_" + str(i) + ".txt")
+        grid = Grid(filename="levels/4x4/grid_" + str(i) + ".txt")
         num_wins += play_game(grid, policy)
-      print("Testing won " + str(num_wins) + "out of 10 games!")
+      print("Testing won " + str(num_wins) + "out of 100 games!")
 
 # Program entry point.
 if __name__ == "__main__":
