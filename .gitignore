@@ -11,3 +11,10 @@ __pycache__/
 
 .idea/
 .idea/*
+
+
+.tabular/
+tabular/
+tabular/
+tabular/*
+tabular/**
