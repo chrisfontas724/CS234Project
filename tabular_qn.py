@@ -11,24 +11,22 @@ import pickle
 # Train a tabular dqn model here.
 def train(size, gamma=0.9):
 
-	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "trial" + ".txt")
+	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "1" + ".txt")
 	epsilon = 1.0
 	#states = grid.generate_all_states()
 	#state_size = len(states)
-	#print("Generated all state sizes. Size: ", state_size)
-	action_size = 4 * (size-2) # number of colors is 4 in 5*5 grid
+	action_size = 4 * (size-1) # number of colors is 4 in 5*5 grid
 	lr = 0.5
 	gamma = 0.9
-	count = 0
-	Q = dict() # np.zeros((state_size, action_size))
+
+	Q = dict() #np.zeros((state_size, action_size))
 
 	state = grid.start_state
-	for i in range(5000000):
+	for i in range(6000000):
 		if i%1000==0:
 			print("Iteration ", i)
-			if epsilon > 0.1:
-				epsilon -= 9e-9
-
+			if epsilon >0.05:
+				epsilon -= 0.05
 
 
 		if not state in Q:
@@ -59,13 +57,10 @@ def train(size, gamma=0.9):
 		Q[state][action] = Q[state][action] + lr * (reward + gamma * np.max(Q[new_state]) - Q[state][action])
 
 		if new_state.is_winning():
-			print("Winning state")
-			count += 1
 			state = grid.start_state
 			epsilon = 1.0
 		else:
 			state = new_state
-	print("Counter of number of winning states: ", count)
 
 	return Q
 
@@ -74,22 +69,23 @@ def train(size, gamma=0.9):
 
 # Play tabular here.
 def play(Q, size):
-	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "trial" + ".txt")
-	action_size = 4 * (size-2)
-	epsilon = 0.1
+	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "1" + ".txt")
+
+	epsilon = 0.05
+	action_size = 4 * (size-1) # number of colors is 4 in 5*5 grid
+
 	state = grid.start_state
 	won = False
 	while True:
-		if random.uniform(0, 1) < epsilon or not state in Q:
+
+		if random.uniform(0, 1) < epsilon:
 			action = random.randint(0,action_size-1)
 		else:
 			action = np.argmax(Q[state])
 
-
 		color = int(action / 4 + 1)
 		direction = int(action % 4)
 		action_tu = (color, direction)
-		print("Take action: ", action_tu)
 
 		if not state.is_viable_action(action_tu):
 			continue
@@ -97,15 +93,14 @@ def play(Q, size):
 		# Advance to the next state.
 		state = state.next_state(action_tu)
 
-		renderer = Renderer("Play")
-		renderer.render(state)
-		renderer.tear_down()
-
 		# Break if we're in the winning state.
 		if state.is_winning():
 			won = True
 			break
 
+	renderer = Renderer("Play")
+	renderer.render(state)
+	renderer.tear_down()
 	return won
 
 # Determines the board size we will be using for training.
@@ -115,9 +110,8 @@ def get_options():
 	parser.add_option("-s", "--size",
 						action="store", # optional because action defaults to "store"
                       	dest="size",
-                      	default=5,
+                      	default=4,
                       	help="Size of board to use",)
-
 
 
 	parser.add_option("-m", "--mode",
@@ -134,17 +128,15 @@ def main():
 	options, args = get_options()
 	print("Training with boards of size ", options.size)
 
-
 	if options.mode == "train":
 		Q = train(size=int(options.size), gamma=0.9)
-		with open("tabular/" + str(options.size) + "x" + str(options.size) + ".pickle", 'wb') as handle:
+		with open("tabular/" + options.size +"x" + options.size + ".pickle", 'wb') as handle:
 			pickle.dump(Q, handle, protocol=pickle.HIGHEST_PROTOCOL)
 	else:
-		with open("tabular/" + str(options.size) + "x" + str(options.size) + ".pickle", 'rb') as handle:
+		with open("tabular/" + options.size +"x" + options.size + ".pickle", 'rb') as handle:
 			Q = pickle.load(handle)
-	final = play(Q,size=int(options.size))
-	print("Results: ", final)
-
+		final = play(Q,size=int(options.size))
+		print("Results: ", final)
 
 if __name__ == "__main__":
 	main()
