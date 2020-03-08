@@ -9,8 +9,9 @@ from os import path
 
 # Train a tabular dqn model here. We can pass in an existing q function to continue training
 # from a previous run.
-def train(file, size, Q=dict(), gamma=0.9):
+def train(file, size, Q=dict(), gamma=0.9, num_epochs=3):
 	print("Train ", file)
+	print("Epochs: ", num_epochs)
 	grid = Grid(filename=file)
 	epsilon = 1.0
 
@@ -25,7 +26,7 @@ def train(file, size, Q=dict(), gamma=0.9):
 	action_size = 4 * (size-1) # number of colors is 4 in 5*5 grid
 
 	iter = 0
-	for epoch in range(3):
+	for epoch in range(num_epochs):
 		print("Epoch: ", epoch)
 		for state in all_states:
 			for action in range(action_size):
@@ -79,7 +80,7 @@ def play(file, Q, size):
 	grid = Grid(filename=file)
 	print("Playing ", file)
 
-	epsilon = 0.05
+	epsilon = 0.005
 	action_size = 4 * (size-1) # number of colors is (size-1), number of directions is 4.
 
 	state = grid.start_state
@@ -113,6 +114,7 @@ def play(file, Q, size):
 	renderer.render(state)
 	renderer.tear_down()
 
+	print ("Took " + str(turns) + " turns!")
 	return won
 
 # Determines the board size we will be using for training.
@@ -139,6 +141,13 @@ def get_options():
                       dest="grid",
                       help="grid board number to use",)
 
+
+	parser.add_option("-e", "--epochs",
+					  action="store", # optional because action defaults to "store"
+					  default="default",
+                      dest="epochs",
+                      help="training epochs",)
+
 	return parser.parse_args()
 
 
@@ -161,7 +170,7 @@ def main():
 				Q = pickle.load(handle)
 
 		# Train Q
-		Q = train(file=grid_name, size=int(options.size), Q=Q, gamma=0.9)
+		Q = train(file=grid_name, size=int(options.size), Q=Q, gamma=0.9, num_epochs=int(options.epochs))
 
 		# Save Q dictionary back to disk.
 		with open(file, 'wb') as handle:
