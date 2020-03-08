@@ -200,7 +200,19 @@ class Grid:
 
             # Update the resulting state based on the move.
             direction = action_map[action]
-            new_tip = (tip[0] + direction[0], tip[1] + direction[1])
+
+
+            # If the color is already at the end point and we move it again, we
+            # should reset this flow.
+            if check_end_tips and tip == self.info.color_end_coords[color]:
+                new_tip = self.info.color_start_coords[color];
+                for x in range(self.info.size):
+                    for y in range(self.info.size):
+                        if self.spaces[x][y] == color and (x,y) != self.info.color_start_coords[color] and \
+                        (x,y) != self.info.color_end_coords[color]:
+                            result.spaces[x][y] = 0.
+            else:
+                new_tip = (tip[0] + direction[0], tip[1] + direction[1])
 
             # If the action moves the flow into a space that is already occupied
             # then that means it has interrupted another flow, so that other flow
@@ -229,6 +241,26 @@ class Grid:
             # return the state.
             return result
 
+
+        # Number of zeros on the board.
+        def num_zeroes_remaining(self):
+            count = 0
+            for x in range(self.info.size):
+                for y in range(self.info.size):
+                    if self.spaces[x][y] == 0:
+                        count+=1
+            return count
+
+
+        # Check to see how many completed flows there are, and use that to help
+        # dole out rewards for our RL agents.
+        def completed_flow_count(self):
+            count = 0
+            # Finally, make sure all the flows have reached their end goal.
+            for color in range(1, self.info.num_cols + 1):
+                if self.tips[color] == self.info.color_end_coords[color]:
+                    count += 1
+            return count
 
         # Checks to see if the provided state is a winning state or not. To be
         # a winning state, all spaces must be covered and all starting and end

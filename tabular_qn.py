@@ -4,81 +4,91 @@ import random
 from optparse import OptionParser
 from renderer.renderer import GridRenderer as Renderer
 import pickle
+import os.path
+from os import path
 
-
-
-
-# Train a tabular dqn model here.
-def train(size, gamma=0.9):
-
-	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "1" + ".txt")
+# Train a tabular dqn model here. We can pass in an existing q function to continue training
+# from a previous run.
+def train(file, size, Q=dict(), gamma=0.9):
+	print("Train ", file)
+	grid = Grid(filename=file)
 	epsilon = 1.0
-	#states = grid.generate_all_states()
-	#state_size = len(states)
-	action_size = 4 * (size-1) # number of colors is 4 in 5*5 grid
+
+	print("Generate all states!")
+	all_states = grid.generate_all_states()
+	state_size = len(all_states)
+	print("All states: ", state_size)
+
 	lr = 0.5
 	gamma = 0.9
+	winning_states = 0
+	action_size = 4 * (size-1) # number of colors is 4 in 5*5 grid
 
-	Q = dict() #np.zeros((state_size, action_size))
+	iter = 0
+	for epoch in range(3):
+		print("Epoch: ", epoch)
+		for state in all_states:
+			for action in range(action_size):
 
-	state = grid.start_state
-	for i in range(6000000):
-		if i%1000==0:
-			print("Iteration ", i)
-			if epsilon >0.05:
-				epsilon -= 0.05
+				if iter % 1000 == 0:
+					print("iteration ", iter)
 
+				if not state in Q:
+					Q[state] = np.zeros((action_size))
 
-		if not state in Q:
-			Q[state] = np.zeros((action_size))
+				color = int(action /4 + 1)
+				direction = int(action % 4)
+				action_tu = (color, direction)
 
+				def get_next_tuple():
+					if state.is_viable_action(action_tu):
+						new_state = state.next_state(action_tu)
+						if new_state.is_winning():
+							reward = 1000000000
+							return new_state, reward
+						else:
+							flows = new_state.completed_flow_count()
+							zeroes = new_state.num_zeroes_remaining()
+							reward = -5 * zeroes
+							for f in range(flows):
+								reward += 1000
+							return new_state, reward
+					else:
+						reward = -1000000
+						new_state = state
+						return new_state, reward
 
-		if random.uniform(0, 1) < epsilon:
-			action = random.randint(0,action_size-1)
-		else:
-			action = np.argmax(Q[state])
+				new_state, reward = get_next_tuple()
 
-		color = int(action / 4 + 1)
-		direction = int(action % 4)
-		action_tu = (color, direction)
+				if not new_state in Q:
+					Q[new_state] = np.zeros((action_size))
 
+				Q[state][action] = Q[state][action] + lr * (reward + gamma * np.max(Q[new_state]) - Q[state][action])
 
-		if state.is_viable_action(action_tu):
-			new_state = state.next_state(action_tu)
-			reward = 1000 if new_state.is_winning() else 10
-		else:
-			reward = -10000
-			new_state = state
+				if new_state.is_winning():
+					print("Winning State!")
+					winning_states += 1
+				iter+=1
 
-
-		if not new_state in Q:
-			Q[new_state] = np.zeros((action_size))
-
-		Q[state][action] = Q[state][action] + lr * (reward + gamma * np.max(Q[new_state]) - Q[state][action])
-
-		if new_state.is_winning():
-			state = grid.start_state
-			epsilon = 1.0
-		else:
-			state = new_state
-
+	print("Number of winning states: ", winning_states)
 	return Q
 
 
-
-
 # Play tabular here.
-def play(Q, size):
-	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + "1" + ".txt")
+def play(file, Q, size):
+	grid = Grid(filename=file)
+	print("Playing ", file)
 
 	epsilon = 0.05
-	action_size = 4 * (size-1) # number of colors is 4 in 5*5 grid
+	action_size = 4 * (size-1) # number of colors is (size-1), number of directions is 4.
 
 	state = grid.start_state
 	won = False
-	while True:
 
-		if random.uniform(0, 1) < epsilon:
+	turns = 0
+
+	while turns < 100000:
+		if random.uniform(0, 1) < epsilon or not state in Q:
 			action = random.randint(0,action_size-1)
 		else:
 			action = np.argmax(Q[state])
@@ -86,6 +96,8 @@ def play(Q, size):
 		color = int(action / 4 + 1)
 		direction = int(action % 4)
 		action_tu = (color, direction)
+
+		turns += 1
 
 		if not state.is_viable_action(action_tu):
 			continue
@@ -97,10 +109,10 @@ def play(Q, size):
 		if state.is_winning():
 			won = True
 			break
-
 	renderer = Renderer("Play")
 	renderer.render(state)
 	renderer.tear_down()
+
 	return won
 
 # Determines the board size we will be using for training.
@@ -120,22 +132,45 @@ def get_options():
                       	default="train",
                       	help="train or test",)
 
+
+	parser.add_option("-g", "--grid",
+					  action="store", # optional because action defaults to "store"
+					  default="default",
+                      dest="grid",
+                      help="grid board number to use",)
+
 	return parser.parse_args()
 
 
 def main():
 	# Grab the command line options.
 	options, args = get_options()
-	print("Training with boards of size ", options.size)
+	grid_num = options.grid
+	print("Running with boards of size ", options.size)
+	file = "tabular/" + options.size + "x" + options.size + "_grid" + grid_num + ".pickle"
+	grid_name = "levels/" + options.size + "x" + options.size + "/" + "grid_" + grid_num + ".txt"
+	print("File: ", file)
 
 	if options.mode == "train":
-		Q = train(size=int(options.size), gamma=0.9)
-		with open("tabular/" + options.size +"x" + options.size + ".pickle", 'wb') as handle:
+		# If there's already a Q file on disk with this name, load it up
+		# again to resume training.
+		Q = dict()
+		if path.exists(file):
+			print("Loading existing train file...")
+			with open(file, 'rb') as handle:
+				Q = pickle.load(handle)
+
+		# Train Q
+		Q = train(file=grid_name, size=int(options.size), Q=Q, gamma=0.9)
+
+		# Save Q dictionary back to disk.
+		with open(file, 'wb') as handle:
 			pickle.dump(Q, handle, protocol=pickle.HIGHEST_PROTOCOL)
 	else:
-		with open("tabular/" + options.size +"x" + options.size + ".pickle", 'rb') as handle:
+		print("Loading file from disk...")
+		with open(file, 'rb') as handle:
 			Q = pickle.load(handle)
-		final = play(Q,size=int(options.size))
+		final = play(file=grid_name, Q=Q, size=int(options.size))
 		print("Results: ", final)
 
 if __name__ == "__main__":
