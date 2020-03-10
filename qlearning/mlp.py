@@ -17,7 +17,7 @@ class MLPConfig:
         self.num_colors = num_colors
         self.num_hidden = num_hidden
         self.feature_vector_size = (self.board_size **2) + 6*self.num_colors + 4
-        self.nodes_per_layer = (self.board_size ) ** 2 + 5
+        self.nodes_per_layer = (self.board_size ) ** 2 + 3000
         self.num_actions = num_colors * 4
 
 

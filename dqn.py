@@ -121,17 +121,19 @@ def update_target_network(mlp):
 
 def make_mlp(size, cols):
 	# Create the MLP network with the configuration.
-	mlp_config = MLPConfig(size, cols,  num_hidden=3)
+	mlp_config = MLPConfig(size, cols,  num_hidden=20)
 	mlp = MLP(mlp_config)
 	mlp = mlp.float()
 	return mlp
 
-def train(size, gamma=0.9):
+def train(device, size, gamma=0.9):
 	mlp = make_mlp(size, size-1)
+	mlp.to(device)
+
 	replay_buffer = initialize_buffer_with_all_tuples(size, mlp) #   initialize_replay_buffer(load_grids(size), mlp)
 	epsilon = 1.0
 	optimizer = torch.optim.Adam(mlp.parameters(), lr=0.01) # 
-	loss_function =  F.smooth_l1_loss # torch.nn.MSELoss()
+	loss_function = torch.nn.MSELoss()
 
 	target_mlp = None
 	update_target = 500
@@ -150,7 +152,7 @@ def train(size, gamma=0.9):
 			target_state_dict = copy.deepcopy(target_mlp.state_dict())
 
 			print(target_mlp)
-			pytorch_total_params = sum(p.numel() for p in target_mlp.parameters())
+			pytorch_total_params = sum(p.numel() for p in mlp.parameters() if p.requires_grad)
 			print("TOTAL PARAMS: ", pytorch_total_params)
 			for param in target_mlp.parameters():
 				print(param.data)
@@ -163,7 +165,7 @@ def train(size, gamma=0.9):
 				print("Target has been altered!")
 
 		# Sample a random mini-batch from the replay buffer.
-		batch = get_mini_batch(replay_buffer, 200) #len(replay_buffer))
+		batch = get_mini_batch(replay_buffer, 50) #len(replay_buffer))
 		target_values = torch.zeros([len(batch), 1], dtype=torch.float32)
 		model_values = torch.zeros([len(batch), 1], dtype=torch.float32)
 
@@ -235,7 +237,6 @@ def train(size, gamma=0.9):
 
 def play(mlp, size=4):
 	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_100.txt")
-	renderer = GridRenderer("Q-Learning")
 
 	# Wrap the states as QStates to get functionality
 	# specifically needed for Q-learning.
@@ -247,8 +248,10 @@ def play(mlp, size=4):
 		features = state.get_feature_vector()
 
 		# Get best action from the MLP.
-		action, _ = mlp.greedy_action(features, grad=False)
+		action, _ = mlp.get_next_action(features, grad=False, exploration_rate=0.1)
 		print("Take action: ", action)
+
+
 
 		turns+=1
 		if not state.is_viable_action(action):
@@ -257,13 +260,16 @@ def play(mlp, size=4):
      	# Advance to the next state.
 		state = state.next_state(action)
 
+		renderer = GridRenderer("Q-Learning")
+		renderer.render(state.state)
+		renderer.tear_down()
+
 		# Break if we're in the winning state.
 		if state.is_winning():
 			won = True
 			break
 	
-	renderer.render(state.state)
-	renderer.tear_down()
+
 
 	return won
 
@@ -291,14 +297,32 @@ def get_options():
 
 	return parser.parse_args()
 
+def check_gpu():
+	print("Check GPU")
+	# cuda_device = torch.cuda.current_device()
+	# print(cuda_device)
+
+	# print(torch.cuda.device(0))
+
+	# print("Device count: ", torch.cuda.device_count())
+
+	# print("Device name: ", torch.cuda.get_device_name())
+
+	# print("Device available: ", torch.cuda.is_available())
+
+	return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+
+
 def main():
+	device = check_gpu()
+
 	# Grab the command line options.
 	options, args = get_options()
 	print("Training with boards of size ", options.size)
 
 	size = int(options.size)
 	if options.mode == "train":
-		mlp = train(size)
+		mlp = train(device, size)
 	elif options.mode == "play":
 		parameters = torch.load("q_models/" + options.file)
 		mlp_config = MLPConfig(size, size-1,  num_hidden=3)
