@@ -18,3 +18,11 @@ tabular/
 tabular/
 tabular/*
 tabular/**
+
+
+
+.q_models/
+q_models/
+q_models/
+q_models/*
+q_models/**
