@@ -16,8 +16,8 @@ class MLPConfig:
         self.board_size = board_size
         self.num_colors = num_colors
         self.num_hidden = num_hidden
-        self.feature_vector_size = (self.board_size **2) + 6*self.num_colors + 2
-        self.nodes_per_layer = self.feature_vector_size * 2
+        self.feature_vector_size = (self.board_size **2) + 6*self.num_colors + 4
+        self.nodes_per_layer = self.board_size ** 2 + 6*num_hidden
         self.num_actions = num_colors * 4
 
 
@@ -28,14 +28,24 @@ class MLP(nn.Module):
     def __init__(self, config):
         super(MLP, self).__init__()
 
+        print("Init MLP: ")
         self.config = config
         self.layers = []
         input_size = self.config.feature_vector_size
+        node_count = config.nodes_per_layer
         for h in range(config.num_hidden):
-        	self.layers.append(nn.Linear(input_size, config.nodes_per_layer))
-        	input_size = config.nodes_per_layer
+            linear = nn.Linear(input_size, node_count)
+           # torch.nn.init.xavier_uniform(linear.weight)
+            print("MLP Layer: " + str(input_size) + " " + str(node_count))
+            linear.bias.data.fill_(0.00)
+            self.layers.append(linear)
+            input_size = node_count
+            node_count -= 5
+
+
         self.output = nn.Linear(input_size, config.num_actions)
 
+        self.sigmoid = nn.Sigmoid()
         self.relu = nn.ReLU()
         self.softmax = nn.Softmax(dim=0)
 
@@ -63,8 +73,11 @@ class MLP(nn.Module):
             return self.convert_index_to_tuple(index), value
         with torch.no_grad():
             value, index_tensor = self.get_Q(state).max(0)
+            #print("Test: " + str(value) + " " + str(index_tensor.item()))
             index = index_tensor.item()
-            return self.convert_index_to_tuple(index), value
+            action, q_sa = self.convert_index_to_tuple(index), value
+           # print("Action: " + str(action) + " QSA: " + str(q_sa))
+            return action, q_sa
 
     def random_action(self, state, grad):
         if grad:

@@ -1,4 +1,4 @@
 opencv-python==4.1.0.25
-numpy
+numpy==1.5.0
 torch
 matplotlib

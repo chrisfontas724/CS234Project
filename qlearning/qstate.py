@@ -40,6 +40,14 @@ class QState(Grid.State):
         # Add in if this is a winning state or not.
         flattened_spaces = np.append(flattened_spaces, int(self.is_winning()))
 
+        # Add in the number of zeroes
+        flattened_spaces = np.append(flattened_spaces, self.num_zeroes_remaining())
+
+        # Add in the number of flows.
+        flattened_spaces = np.append(flattened_spaces, self.completed_flow_count())
+
+        
+
 
         # Make sure the vector is in float format before returning.
         return torch.from_numpy(flattened_spaces).float()
@@ -81,25 +89,28 @@ class QState(Grid.State):
 
         # We need to penalize impossible actions very highly.
         if not self.state.is_viable_action(action):
-            return (self, -1000, False) #returns new state as current state
+            return (self, -100, False) #returns new state as current state
         else:
             state = self.next_state(action)
             won = state.is_winning()
 
             if won is True:
-                reward = 10000000
-                return(state, reward, won)
+                reward = 1000
+                return(state, reward, True)
 
             else:
 
+                # If the new state has fewer zeros than the old state, this should be rewarded.
+                # Otherwise we should subtract points if the new state has more zeroes.
                 zeros = self.state.num_zeroes_remaining() - state.num_zeroes_remaining()
-                reward = 100 * zeros
+                reward = 2 * zeros
 
-
+                # If the new state has more flows than the old state, add points. If it has fewer
+                # flows, that mean a flow was broken and so we should remove points.
                 flow  = state.completed_flow_count() -  self.state.completed_flow_count()
-                reward += 100 * flow
+                reward += 10 * flow
 
-                return (state, reward, won)
+                return (state, reward, False)
 
 
 
