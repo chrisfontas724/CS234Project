@@ -121,7 +121,7 @@ def update_target_network(mlp):
 
 def make_mlp(size, cols):
 	# Create the MLP network with the configuration.
-	mlp_config = MLPConfig(size, cols,  num_hidden=20)
+	mlp_config = MLPConfig(size, cols)
 	mlp = MLP(mlp_config)
 	mlp = mlp.float()
 	return mlp
@@ -136,7 +136,7 @@ def train(device, size, gamma=0.9):
 	loss_function = torch.nn.MSELoss()
 
 	target_mlp = None
-	update_target = 500
+	update_target = 10000
 	train_steps = 10000000
 	average_loss = 0.
 	target_state_dict = None
@@ -165,14 +165,15 @@ def train(device, size, gamma=0.9):
 				print("Target has been altered!")
 
 		# Sample a random mini-batch from the replay buffer.
-		batch = get_mini_batch(replay_buffer, 50) #len(replay_buffer))
+		batch_size = len(replay_buffer)
+		batch = get_mini_batch(replay_buffer, batch_size) #len(replay_buffer))
 		target_values = torch.zeros([len(batch), 1], dtype=torch.float32)
 		model_values = torch.zeros([len(batch), 1], dtype=torch.float32)
 
         # zero the parameter gradients
 		optimizer.zero_grad()
 
-		for b in range(len(batch)):
+		for b in range(batch_size):
 			# Expand out the tuple.
 			state, action, reward, new_state, terminal = batch[b]
 
@@ -325,7 +326,7 @@ def main():
 		mlp = train(device, size)
 	elif options.mode == "play":
 		parameters = torch.load("q_models/" + options.file)
-		mlp_config = MLPConfig(size, size-1,  num_hidden=3)
+		mlp_config = MLPConfig(size, size-1)
 		mlp = MLP(mlp_config)
 		mlp.load_state_dict(parameters)
 		mlp.train(False)

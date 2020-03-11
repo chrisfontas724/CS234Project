@@ -12,12 +12,11 @@ import random
 # including the dimensions of its input and output layers, to
 # accommodate boards of different sizes.
 class MLPConfig:
-    def __init__(self, board_size, num_colors, num_hidden=5):
+    def __init__(self, board_size, num_colors):
         self.board_size = board_size
         self.num_colors = num_colors
-        self.num_hidden = num_hidden
         self.feature_vector_size = (self.board_size **2) + 6*self.num_colors + 4
-        self.nodes_per_layer = (self.board_size ) ** 2 + 3000
+        self.nodes_per_layer = self.feature_vector_size - 4
         self.num_actions = num_colors * 4
 
 
@@ -33,25 +32,48 @@ class MLP(nn.Module):
         self.layers = []
         input_size = self.config.feature_vector_size
         node_count = config.nodes_per_layer
-        for h in range(config.num_hidden):
-            print("MLP Layer " + str(h) + ": " +  str(input_size) + " " + str(node_count))
-            linear = nn.Linear(input_size, node_count)
-            torch.nn.init.xavier_uniform(linear.weight)
-            linear.bias.data.fill_(0.01)
-            self.layers.append(linear)
-            input_size = node_count
-            node_count -= 2
 
-        print("MLP Output: " + str(input_size) + " " + str(config.num_actions))
-        self.output = nn.Linear(input_size, config.num_actions)
+        self.layer1 = nn.Linear(input_size, node_count, bias=False)
 
-        self.sigmoid = nn.Sigmoid()
+        input_size = node_count
+        node_count -= 2
+        self.layer2 = nn.Linear(input_size, node_count, bias=False)
+
+        input_size = node_count
+        node_count -= 2
+        self.layer3 = nn.Linear(input_size, node_count, bias=False)
+
+        input_size = node_count
+        node_count -= 2
+        self.layer4 = nn.Linear(input_size, node_count, bias=False)
+
+        input_size = node_count
+        node_count -= 2
+        self.layer5 = nn.Linear(input_size, node_count, bias=False)
+
+        input_size = node_count
+        node_count -= 2
+        self.layer6 = nn.Linear(input_size, node_count, bias=False)
+
+        input_size = node_count
+        node_count = config.num_actions
+        self.output = nn.Linear(input_size, node_count, bias=False)
+
         self.relu = nn.ReLU()
 
     def forward(self, x):
-        for h in range(self.config.num_hidden):
-            x = self.layers[h](x)
-            x = self.relu(x)
+        x = self.layer1(x)
+        x = self.relu(x)
+        x = self.layer2(x)
+        x = self.relu(x)
+        x = self.layer3(x)
+        x = self.relu(x)
+        x = self.layer4(x)
+        x = self.relu(x)
+        x = self.layer5(x)
+        x = self.relu(x)
+        x = self.layer6(x)
+        x = self.relu(x)
         x = self.output(x)
         return x
 
