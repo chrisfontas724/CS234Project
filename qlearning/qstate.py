@@ -89,13 +89,13 @@ class QState(Grid.State):
 
         # We need to penalize impossible actions very highly.
         if not self.state.is_viable_action(action):
-            return (self, -1000.0, False) #returns new state as current state
+            return (self, -10.0, False) #returns new state as current state
         else:
             state = self.next_state(action)
             won = state.is_winning()
 
             if won is True:
-                reward = 10000.0
+                reward = 100.0
                 return(state, reward, True)
 
             else:
@@ -103,12 +103,16 @@ class QState(Grid.State):
                 # If the new state has fewer zeros than the old state, this should be rewarded.
                 # Otherwise we should subtract points if the new state has more zeroes.
                 zeros = state.num_zeroes_remaining() #  self.state.num_zeroes_remaining() - state.num_zeroes_remaining()
-                reward = -1.5 * zeros
+               # reward = -1.5 * zeros
+                reward = 0
 
                 # # If the new state has more flows than the old state, add points. If it has fewer
                 # # flows, that mean a flow was broken and so we should remove points.
-                flow  = state.completed_flow_count() #-  self.state.completed_flow_count()
-                reward += 10.0 * flow
+                flow  = state.completed_flow_count() -  self.state.completed_flow_count()
+                if flow > 0:
+                    reward += flow
+                else:
+                    reward +=  2 * flow
 
                 return (state, reward, False)
 
