@@ -46,25 +46,25 @@ class MLP(nn.Module):
         self.layer3 = nn.Linear(input_size, node_count, bias=True)
         torch.nn.init.xavier_uniform(self.layer3.weight)
 
-        input_size = node_count
-        node_count -= 2
-        self.layer4 = nn.Linear(input_size, node_count, bias=True)
-        torch.nn.init.xavier_uniform(self.layer4.weight)
+        # input_size = node_count
+        # node_count -= 2
+        # self.layer4 = nn.Linear(input_size, node_count, bias=True)
+        # torch.nn.init.xavier_uniform(self.layer4.weight)
 
-        input_size = node_count
-        node_count -= 2
-        self.layer5 = nn.Linear(input_size, node_count, bias=True)
-        torch.nn.init.xavier_uniform(self.layer5.weight)
+        # input_size = node_count
+        # node_count -= 2
+        # self.layer5 = nn.Linear(input_size, node_count, bias=True)
+        # torch.nn.init.xavier_uniform(self.layer5.weight)
 
-        input_size = node_count
-        node_count -= 2
-        self.layer6 = nn.Linear(input_size, node_count, bias=True)
-        torch.nn.init.xavier_uniform(self.layer6.weight)
+        # input_size = node_count
+        # node_count -= 2
+        # self.layer6 = nn.Linear(input_size, node_count, bias=True)
+        # torch.nn.init.xavier_uniform(self.layer6.weight)
 
-        input_size = node_count
-        node_count -= 2
-        self.layer7 = nn.Linear(input_size, node_count, bias=True)
-        torch.nn.init.xavier_uniform(self.layer7.weight)
+        # input_size = node_count
+        # node_count -= 2
+        # self.layer7 = nn.Linear(input_size, node_count, bias=True)
+        # torch.nn.init.xavier_uniform(self.layer7.weight)
 
         input_size = node_count
         node_count -= 2
@@ -103,18 +103,18 @@ class MLP(nn.Module):
         x = self.relu(x)
         x = self.drop_layer(x)
 
-        x = self.layer4(x)
-        x = self.relu(x)
+        # x = self.layer4(x)
+        # x = self.relu(x)
 
-        x = self.layer5(x)
-        x = self.relu(x)
-        x = self.drop_layer(x)
+        # x = self.layer5(x)
+        # x = self.relu(x)
+        # x = self.drop_layer(x)
 
-        x = self.layer6(x)
-        x = self.relu(x)
+        # x = self.layer6(x)
+        # x = self.relu(x)
 
-        x = self.layer7(x)
-        x = self.sigmoid(x)
+        # x = self.layer7(x)
+        # x = self.sigmoid(x)
 
         x = self.layer8(x)
         x = self.sigmoid(x)

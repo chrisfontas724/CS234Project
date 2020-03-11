@@ -282,7 +282,7 @@ def play(mlp, size=4):
 		features = state.get_feature_vector()
 
 		# Get best action from the MLP.
-		action, _ = mlp.get_next_action(features, grad=False, exploration_rate=0.0)
+		action, _ = mlp.get_next_action(features, grad=False, exploration_rate=0.15)
 		print("Take action: ", action)
 
 
