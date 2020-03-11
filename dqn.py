@@ -282,9 +282,8 @@ def play(mlp, size=4):
 		features = state.get_feature_vector()
 
 		# Get best action from the MLP.
-		action, _ = mlp.get_next_action(features, grad=False, exploration_rate=0.15)
-		print("Take action: ", action)
-
+		action, _ = mlp.get_next_action(features, grad=False, exploration_rate=0.05)
+		#print("Take action: ", action)
 
 		turns+=1
 		if not state.is_viable_action(action):
@@ -293,15 +292,18 @@ def play(mlp, size=4):
      	# Advance to the next state.
 		state = state.next_state(action)
 
-		renderer = GridRenderer("Q-Learning")
-		renderer.render(state.state)
-		renderer.tear_down()
+
 
 		# Break if we're in the winning state.
 		if state.is_winning():
 			won = True
 			break
 
+
+	if won:
+		renderer = GridRenderer("Q-Learning")
+		renderer.render(state.state)
+		renderer.tear_down()
 
 	return won
 
@@ -365,8 +367,9 @@ def main():
 		mlp.load_state_dict(parameters)
 		mlp.train(False)
 
-		status = play(mlp, int(options.size))
-		print("We " + ("won \\^_^/" if status else "lost =("))
+		for i in range(40):
+			status = play(mlp, int(options.size))
+			print("We " + ("won \\^_^/" if status else "lost =("))
 
 if __name__ == "__main__":
 	main()
