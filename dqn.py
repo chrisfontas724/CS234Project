@@ -269,8 +269,8 @@ def train(device, size, gamma=0.9):
 	return mlp
 
 
-def play(mlp, size=4):
-	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_1.txt")
+def play(mlp, size=4, index=1):
+	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_" + str(index) + ".txt")
 
 	# Wrap the states as QStates to get functionality
 	# specifically needed for Q-learning.
@@ -292,18 +292,16 @@ def play(mlp, size=4):
      	# Advance to the next state.
 		state = state.next_state(action)
 
-
-
 		# Break if we're in the winning state.
 		if state.is_winning():
 			won = True
 			break
 
 
-	if won:
-		renderer = GridRenderer("Q-Learning")
-		renderer.render(state.state)
-		renderer.tear_down()
+	# if won:
+	# 	renderer = GridRenderer("Q-Learning")
+	# 	renderer.render(state.state)
+	# 	renderer.tear_down()
 
 	return won
 
@@ -367,9 +365,12 @@ def main():
 		mlp.load_state_dict(parameters)
 		mlp.train(False)
 
-		for i in range(40):
-			status = play(mlp, int(options.size))
-			print("We " + ("won \\^_^/" if status else "lost =("))
+		for i in range(1,1000):
+			wins = 0
+			for _ in range(40):
+				wins += play(mlp, int(options.size), i)
+				#print("We " + ("won \\^_^/" if status else "lost =("))
+			print("Board " + str(i) + " won " + str(wins) + " times.")
 
 if __name__ == "__main__":
 	main()
