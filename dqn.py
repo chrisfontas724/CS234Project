@@ -151,11 +151,11 @@ def train(device, size, gamma=0.9):
 			target_mlp = update_target_network(mlp)
 			target_state_dict = copy.deepcopy(target_mlp.state_dict())
 
-			print(target_mlp)
+			#print(target_mlp)
 			pytorch_total_params = sum(p.numel() for p in mlp.parameters() if p.requires_grad)
 			print("TOTAL PARAMS: ", pytorch_total_params)
-			for param in target_mlp.parameters():
-				print(param.data)
+			# for param in target_mlp.parameters():
+			# 	print(param.data)
 
 
 		# Sanity check to make sure we're not accidentally modifying the
@@ -165,7 +165,7 @@ def train(device, size, gamma=0.9):
 				print("Target has been altered!")
 
 		# Sample a random mini-batch from the replay buffer.
-		batch_size = len(replay_buffer)
+		batch_size = 50 #len(replay_buffer)
 		batch = get_mini_batch(replay_buffer, batch_size) #len(replay_buffer))
 		target_values = torch.zeros([len(batch), 1], dtype=torch.float32)
 		model_values = torch.zeros([len(batch), 1], dtype=torch.float32)
@@ -310,6 +310,9 @@ def check_gpu():
 	# print("Device name: ", torch.cuda.get_device_name())
 
 	# print("Device available: ", torch.cuda.is_available())
+
+	if torch.cuda.is_available():
+		print("We have cuda!!!")
 
 	return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
