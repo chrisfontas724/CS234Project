@@ -28,12 +28,22 @@ def main():
 
   losses = list()
   try:
+    limit = 10
+    counter = 0
+    avg = 0.0
     print("Open file...")
     with open(file +".txt", 'r') as filehandle:
       for line in filehandle:
         curr_loss = float(line[:-1])
-        print(curr_loss)
-        losses.append(curr_loss)
+
+        avg += curr_loss
+        counter += 1
+
+        if counter == limit:
+          losses.append(avg / float(limit))
+          avg = 0.01
+          counter = 0
+
       print("got all losses: ", len(losses))
 
 
@@ -42,6 +52,9 @@ def main():
 
   plt.ylim((0, 6))
   plt.xlim((0, len(losses)))
+  plt.xlabel('Training Iterations (Average over every 10 steps)')
+  plt.ylabel('Huber Loss')
+  plt.title('5x5 Training')
 
   plt.plot(losses)
   plt.show()   
