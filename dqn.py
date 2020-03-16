@@ -15,8 +15,8 @@ from matplotlib import pyplot as plt
 # from torchvision import models
 # from torchsummary import summary
 
-starting_items_in_replay = 15000
-max_items_in_replay = 10000000
+starting_items_in_replay = 150000
+max_items_in_replay = 100000000
 
 def load_grids(size):
 	print("Loading grids....")
@@ -29,13 +29,17 @@ def load_grids(size):
 def initialize_replay_buffer(grids, mlp):
 	print("Initializing replay buffer...")
 	result = set()
+
 	for grid in grids:
 		state = QState(grid.start_state)
-		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True, exploration_rate = 1.0)
+		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=False, exploration_rate = 1.0)
 		new_state, reward, terminal = state.step(action)
-		sars = (state, action, reward, q_sa, new_state, terminal)
+
+		action_index = (action[0]-1)*4 + action[1]
+
+		sars = (state, action_index, reward, new_state, terminal)
 		result.add(sars)
-	return result
+	return list(result)
 
 # Hacky/test function to see if we can get DQN working with just a single board, instead
 # of with the entire training set.
@@ -45,7 +49,7 @@ def initialize_replay_buffer_with_single_grid(size, mlp):
 	grid = Grid(filename="levels/" + str(size) + "x" + str(size) + "/grid_100.txt")
 	state = QState(grid.start_state)
 	for i in range(starting_items_in_replay):
-		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=True, exploration_rate=1.0)
+		action, q_sa = mlp.get_next_action(state.get_feature_vector(), grad=False, exploration_rate=1.0)
 		new_state, reward, terminal = state.step(action)
 		sars = (state, action, reward, q_sa, new_state, terminal)
 		result.add(sars)
@@ -135,15 +139,15 @@ def train(device, size, gamma=0.9):
 	mlp = make_mlp(size, size-1)
 	mlp.to(device)
 
-	replay_buffer = initialize_buffer_with_all_tuples(size, mlp) #   initialize_replay_buffer(load_grids(size), mlp)
+	replay_buffer = initialize_replay_buffer(load_grids(size), mlp)
 	#replay_buffer = initialize_buffer_with_single_test_tuple(size)
 	epsilon = 1.0
 	optimizer = torch.optim.Adam(mlp.parameters(), lr=0.001) # 
 	loss_function = torch.nn.SmoothL1Loss() #torch.nn.MSELoss()
 
 	target_mlp = None
-	update_target = 10
-	train_steps = 10000000
+	update_target = 1000
+	train_steps = 500000
 	average_loss = 0.
 	target_state_dict = None
 	losses = list()
@@ -163,8 +167,8 @@ def train(device, size, gamma=0.9):
 		# 		print("Target has been altered!")
 
 		# Sample a random mini-batch from the replay buffer.
-		batch_size = 50 #len(replay_buffer)
-		#batch = get_mini_batch(replay_buffer, batch_size) #len(replay_buffer))
+		batch_size = 200 #len(replay_buffer)
+		batch = get_mini_batch(replay_buffer, batch_size) #len(replay_buffer))
 		batch_end = min(batch_start + batch_size, len(replay_buffer))
 		batch_size = batch_end - batch_start
 		# print("Batch start: ", batch_start)
@@ -176,9 +180,9 @@ def train(device, size, gamma=0.9):
 
 
 		# Update the target nextwork to match the update network.
-		if batch_start >= len(replay_buffer):
-			batch_start = 0
-			update_count += 1
+		#if batch_start >= len(replay_buffer):
+		#	batch_start = 0
+		update_count += 1
 
 		if update_count == update_target or i == 0:
 			print("Update target network!")
@@ -206,6 +210,8 @@ def train(device, size, gamma=0.9):
 
 			# Get the estimated q values for the current state.
 			q_values = mlp(state.get_feature_vector())
+			#print("Q VALUES: ", q_values)
+			#print("ACTION: ", action)
 			q_sa = q_values[action]
 
 			#print(q_values)
@@ -231,20 +237,22 @@ def train(device, size, gamma=0.9):
 
 			# Update the entries in the replay buffer. Don't bother adding winning states in
 			# because they have no viable actions.
-			#if not terminal:
-			#	pass
-				# updated_action, updated_qsa = mlp.get_next_action(new_state.get_feature_vector(), grad=True,exploration_rate=epsilon)
-				# updated_state, reward, terminal = new_state.step(action)
-				# replay_buffer.add((new_state, updated_action, reward, updated_qsa, updated_state, terminal))
-			#else:
-			#	print("Winning state!")
+			if not terminal:
+				updated_action, updated_qsa = mlp.get_next_action(new_state.get_feature_vector(), grad=False,exploration_rate=epsilon)
+				updated_action_index = (updated_action[0]-1)*4 + updated_action[1]
+
+
+				updated_state, reward, terminal = new_state.step(updated_action)
+				replay_buffer.append((new_state, updated_action_index, reward, updated_state, terminal))
+			else:
+				print("Winning state!")
 
 		# Get average loss
 		loss = loss_function(target_values, model_values)
 
 		# Remove the oldest elements from the replay buffer.
-		#if len(replay_buffer) > max_items_in_replay:
-		#	replay_buffer = replay_buffer[len(replay_buffer)-max_items_in_replay:]
+		if len(replay_buffer) > max_items_in_replay:
+			replay_buffer = replay_buffer[len(replay_buffer)-max_items_in_replay:]
 
 		# Perform gradient descent.
 		loss.backward()
@@ -258,14 +266,17 @@ def train(device, size, gamma=0.9):
 		# Print out loss calculations.		
 		if i % 100 == 0:
 			print("Iteration " + str(i) + " average loss: " + str(average_loss / 100))
-			losses.append(average_loss / 10)
+			losses.append(average_loss / 100)
 			average_loss = 0.0
 
 		if i % 100 == 0:
 			torch.save(mlp.state_dict(), "q_models/" + str(size) + "x" + str(size) + "_" + str(i) + "_" + "model_v2.txt")
+			
 
-	plt.plot(losses)
-	plt.show()
+		if i % 50000 == 0 and i != 0:
+			plt.plot(losses)
+			plt.show()
+
 	return mlp
 
 
@@ -365,12 +376,16 @@ def main():
 		mlp.load_state_dict(parameters)
 		mlp.train(False)
 
-		for i in range(1,1000):
+		total_wins = 0
+		for i in range(900, 1000):
 			wins = 0
 			for _ in range(40):
 				wins += play(mlp, int(options.size), i)
 				#print("We " + ("won \\^_^/" if status else "lost =("))
 			print("Board " + str(i) + " won " + str(wins) + " times.")
+			if wins > 0:
+				total_wins += 1
+		print("Total boards won: ", total_wins)
 
 if __name__ == "__main__":
 	main()
