@@ -152,6 +152,15 @@ def train(device, size, gamma=0.9):
 	target_state_dict = None
 	losses = list()
 
+	try:
+		with open(str(size) + "x" + str(size) +  "_losses.txt", 'r') as filehandle:
+			for line in filehandle:
+				curr_loss = line[:-1]
+				losses.append(curr_loss)
+	except IOError:
+		pass
+
+
 	update_count = 0
 
 	batch_start = 0
@@ -261,21 +270,26 @@ def train(device, size, gamma=0.9):
 		
 		optimizer.step()
 
+		losses.append(loss.item())
 		average_loss += loss.item()
 
 		# Print out loss calculations.		
 		if i % 100 == 0:
 			print("Iteration " + str(i) + " average loss: " + str(average_loss / 100))
-			losses.append(average_loss / 100)
 			average_loss = 0.0
+
+			with open(str(size) + "x" + str(size) +  "_losses.txt", 'w') as filehandle:
+				for curr_loss in losses:
+					filehandle.write('%s\n' % curr_loss)
+
 
 		if i % 100 == 0:
 			torch.save(mlp.state_dict(), "q_models/" + str(size) + "x" + str(size) + "_" + str(i) + "_" + "model_v2.txt")
 			
 
-		if i % 50000 == 0 and i != 0:
-			plt.plot(losses)
-			plt.show()
+		# if i % 50000 == 0 and i != 0:
+		# 	plt.plot(losses)
+		# 	plt.show()
 
 	return mlp
 
