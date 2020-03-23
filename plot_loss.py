@@ -33,6 +33,7 @@ def main():
     avg = 0.0
     print("Open file...")
     with open(file +".txt", 'r') as filehandle:
+      print("Got file!")
       for line in filehandle:
         curr_loss = float(line[:-1])
 
@@ -54,7 +55,7 @@ def main():
   plt.xlim((0, len(losses)))
   plt.xlabel('Training Iterations (Average over every 10 steps)')
   plt.ylabel('Huber Loss')
-  plt.title('5x5 Training')
+  plt.title('6x6 Training')
 
   plt.plot(losses)
   plt.show()   

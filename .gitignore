@@ -26,3 +26,17 @@ q_models/
 q_models/
 q_models/*
 q_models/**
+
+
+.levels/
+levels/
+levels/
+levels/*
+levels/**
+
+
+.losses/
+losses/
+losses/
+losses/*
+losses/**
