@@ -41,6 +41,18 @@ losses/
 losses/*
 losses/**
 
+.policies/
+policies/
+policies/
+policies/*
+policies/**
+
+
+.tabular_policies/
+tabular_policies/
+tabular_policies/
+tabular_policies/*
+tabular_policies/**
 
 .Graphs/
 Graphs/
